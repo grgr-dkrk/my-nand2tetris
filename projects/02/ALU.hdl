@@ -27,8 +27,8 @@
 // if (out < 0) set ng = 1
 
 CHIP ALU {
-    IN  
-        x[16], y[16],  // 16-bit inputs        
+    IN
+        x[16], y[16],  // 16-bit inputs
         zx, // zero the x input?
         nx, // negate the x input?
         zy, // zero the y input?
@@ -36,11 +36,37 @@ CHIP ALU {
         f,  // compute out = x + y (if 1) or x & y (if 0)
         no; // negate the out output?
 
-    OUT 
+    OUT
         out[16], // 16-bit output
         zr, // 1 if (out == 0), 0 otherwise
         ng; // 1 if (out < 0),  0 otherwise
 
+    // 参考: https://github.com/ikenox/nand2tetris/blob/master/02/ALU.hdl
+    //      https://github.com/Olical/nand2tetris/blob/master/chips/arithmatic/ALU.hdl
+
     PARTS:
-   // Put you code here:
+    // zx, zy (入力を0)
+    Mux16(a=x, sel=zx, out=outzx);
+    Mux16(a=y, sel=zy, out=outzy);
+
+    // nx, ny (入力を反転)
+    Not16(in=outzx, out=outnx);
+    Not16(in=outzy, out=outny);
+    Mux16(a=outzy, b=outny, sel=ny, out=outny2);
+    Mux16(a=outzx, b=outnx, sel=nx, out=outnx2);
+
+    // f (1は加算　0はAND)
+    Add16(a=outnx2, b=outny2, out=aaddB);
+    And16(a=outnx2, b=outny2, out=aandb);
+    Mux16(a=aandb, b=aaddB, sel=f, out=result);
+
+    // ng (out < 0 の場合に true)
+    Not16(in=result, out=negatedResult);
+    Mux16(a=result, b=negatedResult, sel=no, out=out, out[15]=ng, out[0..7]=finalLeft, out[8..15]=finalRight);
+
+    // zr (out=0 の場合に true)
+    Or8Way(in=finalLeft, out=zrleft);
+    Or8Way(in=finalRight, out=zrright);
+    Or(a=zrleft, b=zrright, out=nzr);
+    Not(in=nzr, out=zr);
 }

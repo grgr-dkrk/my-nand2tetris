@@ -13,5 +13,8 @@ CHIP FullAdder {
         carry;   // Left bit of a + b + c
 
     PARTS:
-    // Put you code here:
+    // 2 の半加算器と 1 の Or で構成する
+    HalfAdder(a=a, b=b, sum=absum, carry=abcarry); // a,b の sum
+    HalfAdder(a=absum, b=c, sum=sum, carry=ccarry); // a,b,c の sum が出る
+    Or(a=abcarry, b=ccarry, out=carry); // a,b の carry と c の carry を Or
 }
