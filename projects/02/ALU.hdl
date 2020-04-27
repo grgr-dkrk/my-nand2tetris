@@ -1,0 +1,72 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU (Arithmetic Logic Unit).
+ * Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs, 
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * In addition, the ALU computes two 1-bit outputs:
+ * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+ * if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN
+        x[16], y[16],  // 16-bit inputs
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute out = x + y (if 1) or x & y (if 0)
+        no; // negate the out output?
+
+    OUT
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    // 参考: https://github.com/ikenox/nand2tetris/blob/master/02/ALU.hdl
+    //      https://github.com/Olical/nand2tetris/blob/master/chips/arithmatic/ALU.hdl
+
+    PARTS:
+    // zx, zy (入力を0)
+    Mux16(a=x, sel=zx, out=outzx);
+    Mux16(a=y, sel=zy, out=outzy);
+
+    // nx, ny (入力を反転)
+    Not16(in=outzx, out=outnx);
+    Not16(in=outzy, out=outny);
+    Mux16(a=outzy, b=outny, sel=ny, out=outny2);
+    Mux16(a=outzx, b=outnx, sel=nx, out=outnx2);
+
+    // f (1は加算　0はAND)
+    Add16(a=outnx2, b=outny2, out=aaddB);
+    And16(a=outnx2, b=outny2, out=aandb);
+    Mux16(a=aandb, b=aaddB, sel=f, out=result);
+
+    // ng (out < 0 の場合に true)
+    Not16(in=result, out=negatedResult);
+    Mux16(a=result, b=negatedResult, sel=no, out=out, out[15]=ng, out[0..7]=finalLeft, out[8..15]=finalRight);
+
+    // zr (out=0 の場合に true)
+    Or8Way(in=finalLeft, out=zrleft);
+    Or8Way(in=finalRight, out=zrright);
+    Or(a=zrleft, b=zrright, out=nzr);
+    Not(in=nzr, out=zr);
+}
