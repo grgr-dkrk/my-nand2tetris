@@ -22,10 +22,23 @@
  * Screen and Keyboard chip specifications given in the book.
  */
 
+// 参考:https://github.com/EricRichardson/Nand2Tetris/blob/master/project5/Memory.hdl
+
 CHIP Memory {
     IN in[16], load, address[15];
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    DMux(in=load, sel=address[14], a=mainmamory ,b=screen);
+
+    // RAM16K
+    RAM16K(in=in, load=mainmamory, address=address[0..13], out=mainout);
+
+    // Screen
+    Screen(in=in, load=screen, address=address[0..12], out=screenout);
+
+    // Keyboard
+    Keyboard(out=keyboard);
+
+    Mux8Way16(a=mainout, b=mainout, c=mainout, d=mainout, e=screenout, f=screenout, g=keyboard, h=false, sel=address[12..14], out=out);
 }
