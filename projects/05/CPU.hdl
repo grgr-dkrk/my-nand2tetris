@@ -25,6 +25,10 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+ // 参考
+ // https://github.com/elynnyap/Nand2Tetris/blob/master/Project5/CPU.hdl (Jump)
+ // https://morimori-kochan.hatenablog.com/entry/2019/01/14/161700
+
 CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
@@ -38,6 +42,72 @@ CHIP CPU {
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
+    // i xx a cccccc ddd jjj
+    // i が 命令の種類（0でA, 1でC)
+    // a と c は comp 領域
+    // d は dist 領域(出力の格納)
+    // j は jump
+
+    // DRegister(データレジスタ) は保存するためだけに使う
+    // ARegister(アドレスレジスタ) 使われる命令によってデータ値、RAMアドレス、ROMアドレスを指す
+
+    // ALU は Chapter2 でやった
+
+    // PC の出力は ROM 回路のアドレス入力に接続される
+    // ROM 回路からは常に ROM[pc] が出力される（現在命令）
+
+    // i が 0か1 によって、a, c, d, jが ARegister の値を決めるか制御ビットになる(実行)
+    // 現在命令の jump と ALU の出力によって、次どの命令を取るかを決める(fetch)
+
     PARTS:
-    // Put your code here:
+    // instruction(instruction[15] = i)
+    // i が0なら A命令 i 1なら C命令
+    Not(in=instruction[15], out=notC);
+
+    // Mux
+    Mux16(a=outAlu, b=instruction, sel=notC, out=out1);
+
+    // ARegister(instruction[5] = d)
+    // d で ALU の結果をレジスタに書き込むかどうかを指定する
+    Or(a=notC, b=instruction[5], out=isA);
+    ARegister(in=out1, load=isA ,out=outA, out[0..14]=addressM);
+
+    // DRegister(instruction[4] = d)
+    // d で ALU の結果をレジスタに書き込むかどうかを指定する
+    And(a=instruction[15], b=instruction[4], out=isD);
+    DRegister(in=outAlu, load=isD, out=outD);
+
+    // Mux(instruction[12] = a)
+    // a で　ALU　が　ARegister か MemoryIn のどちらを操作するかが決まる
+    Mux16(a=outA, b=inM, sel=instruction[12], out=AluAorM);
+
+    // ALU (instruction[6..11] = cccccc)
+    // c で　ALU がどの関数を使うかを決める
+    ALU(x=outD, y=AluAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=outAlu, zr=zr, ng=ng);
+
+    // C命令の場合は writeM を出力
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // Jump 1
+    // ng と zr ではない positive かどうか
+    // これは jump の可否を決めるために必要
+    Not(in=ng, out=notNg);
+    Not(in=zr, out=notZr);
+    And(a=notNg, b=notZr, out=isPos);
+
+    // Jump 2
+    // instruction[0..2] = jjj
+    // 3つの j の値を指定し、 ALU の計算結果でジャンプするかどうかを決める
+    And(a=instruction[2], b=ng, out=jumpNg); // 負の場合
+    And(a=instruction[1], b=zr, out=jumpZr); // 0の場合
+    And(a=instruction[0], b=isPos, out=jumpPos); // 正の場合
+    Or(a=jumpNg, b=jumpZr, out=jumpNeg);
+    Or(a=jumpNeg, b=jumpPos, out=jump);
+
+    // C命令かどうかもチェック
+    Not(in=notC, out=isC);
+    And(a=jump, b=isC, out=loadPc);
+
+    // PC
+    PC(in=outA, load=loadPc, inc=true, reset=reset, out[0..14]=pc);
 }
