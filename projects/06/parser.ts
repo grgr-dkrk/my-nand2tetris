@@ -1,4 +1,4 @@
-import { error } from './util'
+import { error, convertIntToBinaryString } from './util'
 import { GenerateCode } from './code'
 
 export const formatLine = (line: string) => line.trimLeft().split('//')[0]
@@ -6,11 +6,11 @@ export const isACommand = (line: string) => /\@/.test(line)
 
 export const convertToBits = (line: string, index?: number) => {
   const splittedLine = line.split('@')
-  if (
-    !splittedLine ||
-    splittedLine[1] == null ||
-    !isFinite(parseInt(splittedLine[1], 10))
-  )
+  const convertedIntString =
+    splittedLine &&
+    splittedLine[1] != null &&
+    convertIntToBinaryString(splittedLine[1])
+  if (!convertedIntString)
     error(`Compiled Error on line: ${index || 'unknown'} invalid param`)
   const int = parseInt(splittedLine[1], 10)
   return int.toString(2).padStart(16, '0')
