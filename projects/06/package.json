@@ -1,0 +1,20 @@
+{
+  "name": "06",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "run:add": "ts-node ./ ./add/Add.asm",
+    "run:max": "ts-node ./ ./max/Max.asm",
+    "run:maxL": "ts-node ./ ./max/MaxL.asm",
+    "run:pong": "ts-node ./ ./pong/Pong.asm",
+    "run:pongL": "ts-node ./ ./pong/PongL.asm",
+    "run:rect": "ts-node ./ ./rect/Rect.asm",
+    "run:rectL": "ts-node ./ ./rect/RectL.asm"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.4",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.8.3"
+  }
+}
