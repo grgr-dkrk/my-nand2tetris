@@ -7,7 +7,10 @@ const main = () => {
   checkArgv(process.argv)
   const text = getFileText(process.argv[2])
   const parserText = Parser(text)
-  fs.writeFileSync(path.resolve(process.argv[3] || process.argv[2].replace('.asm', '.hack')), parserText.join('\n'))
+  fs.writeFileSync(
+    path.resolve(process.argv[3] || process.argv[2].replace('.asm', '.hack')),
+    parserText.join('\n'),
+  )
 }
 
 main()

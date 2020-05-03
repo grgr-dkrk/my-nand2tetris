@@ -59,7 +59,7 @@ const JumpMap = {
 
 // comp
 export const setComp = (mnemonic: string) => {
-  const comp = new Map(COMP_MAPS).get(mnemonic.trim())
+  const comp = new Map(COMP_MAPS).get(mnemonic)
   if (!comp) return error(`Error setComp, mnemonic is inValid: ${mnemonic}`)
   return comp
 }

@@ -16,3 +16,9 @@ export const getFileText = (path: string) => {
   console.log('getFileText: ok')
   return readFile
 }
+
+export const convertIntToBinaryString = (str: string): string | void => {
+  const int = parseInt(str, 10)
+  if (!isFinite(int)) return
+  return int.toString(2).padStart(16, '0')
+}
