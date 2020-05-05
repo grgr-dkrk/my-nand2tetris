@@ -2,7 +2,6 @@ import { CodeWriter } from './codeWriter'
 
 export const formatLine = (line: string) =>
   line.trimLeft().split('//')[0].trim()
-export const convertToByte = (int: number) => int.toString(2).padStart(16, '0')
 export const getCommand = (spilitedLine: string[]) =>
   spilitedLine && spilitedLine[0] ? spilitedLine[0] : null
 export const getArg1 = (spilitedLine: string[]) =>

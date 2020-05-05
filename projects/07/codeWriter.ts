@@ -12,7 +12,6 @@ import {
   S_CONSTANT,
   S_LOCAL,
   S_ARGUMENT,
-  SignatureTypes,
   S_THIS,
   S_THAT,
   S_TEMP,
@@ -32,6 +31,7 @@ export const C_EQ = 'eq' as const
 export const C_LT = 'lt' as const
 export const C_GT = 'gt' as const
 
+// command の種類
 export const getCommandType = (command: string): CommandTypes => {
   switch (command) {
     case 'arithmetic':
@@ -88,6 +88,13 @@ export const setSignatureLavel = (sig: string) => {
   }
 }
 
+// temp の場合は i + 5 にアクセスする
+export const getTempIndex = (arg: string | null) =>
+  arg ? parseInt(arg) + 5 : 5
+// pointer の場合は i + 3 にアクセスする
+export const getPointerIndex = (arg: string | null) =>
+  arg ? parseInt(arg) + 3 : 3
+
 export const writePushPop = (
   command: string,
   sig: string | null,
@@ -99,19 +106,28 @@ export const writePushPop = (
   // pop
   if (command === C_POP) {
     if (sig === S_TEMP)
-      return `// pop temp ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${arg ? parseInt(arg) + 5 : 5}\nM=D`
+      return `// pop temp ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${getTempIndex(
+        arg,
+      )}\nM=D`
+    if (sig === S_POINTER)
+      return `// pop pointer ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${getPointerIndex(
+        arg,
+      )}\nM=D`
     if (sig === S_STATIC) {
       return `// pop static ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@static.${arg}\nM=D`
     }
-    if (sig === S_POINTER) return `// pop pointer ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${arg ? parseInt(arg) + 3 : 3}\nM=D`
     return `// pop ${sig} ${arg}\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=D+A\n@${signatureLabel}\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@${signatureLabel}\nA=M\nM=D\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=A-D\n@${signatureLabel}\nM=D`
   }
   // push
   if (command === C_PUSH) {
     if (sig === S_TEMP)
-      return `//push temp ${arg}\n@${arg ? parseInt(arg) + 5 : 5}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+      return `//push temp ${arg}\n@${getTempIndex(
+        arg,
+      )}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     if (sig === S_POINTER) {
-      return `//push pointer ${arg}\n@${arg ? parseInt(arg) + 3 : 3}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+      return `//push pointer ${arg}\n@${getPointerIndex(
+        arg,
+      )}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
     if (sig === S_STATIC) {
       return `// push static ${arg}\n@static.${arg}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
@@ -122,8 +138,6 @@ export const writePushPop = (
   }
   return null
 }
-
-
 
 export const writeArithmetic = (command: string) => {
   const index = StackManager.getIndex()
