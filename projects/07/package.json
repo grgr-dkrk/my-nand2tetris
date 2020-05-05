@@ -5,7 +5,13 @@
   "license": "MIT",
   "scripts": {
     "run:simpleadd": "yarn run ts-node . ./StackArithmetic/SimpleAdd/SimpleAdd.vm",
-    "run:stacktest": "yarn run ts-node . ./StackArithmetic/StackTest/StackTest.vm"
+    "run:stacktest": "yarn run ts-node . ./StackArithmetic/StackTest/StackTest.vm",
+    "run:basictest": "yarn run ts-node . ./MemoryAccess/BasicTest/BasicTest.vm",
+    "run:pointertest": "yarn run ts-node . ./MemoryAccess/PointerTest/PointerTest.vm",
+    "run:statictest": "yarn run ts-node . ./MemoryAccess/StaticTest/StaticTest.vm",
+    "run:arithmetictest": "yarn run:simpleadd && yarn run:stacktest",
+    "run:memorytest": "yarn run:basictest && yarn run:pointertest && yarn run:statictest",
+    "test": "yarn run:arithmetictest && yarn run:memorytest"
   },
   "devDependencies": {
     "@types/node": "^13.13.4",
