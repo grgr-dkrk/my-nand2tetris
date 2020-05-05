@@ -30,4 +30,4 @@ export const S_POINTER = 'pointer' as const
 export const S_TEMP = 'temp' as const
 export const S_CONSTANT = 'constant' as const
 export const S_STATIC = 'static' as const
-
+export type SignatureTypes = typeof S_LOCAL |typeof S_ARGUMENT |typeof S_THIS |typeof S_THAT |typeof S_POINTER |typeof S_TEMP |typeof S_CONSTANT | typeof S_STATIC
