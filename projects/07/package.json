@@ -11,7 +11,10 @@
     "run:statictest": "yarn run ts-node . ./MemoryAccess/StaticTest/StaticTest.vm",
     "run:arithmetictest": "yarn run:simpleadd && yarn run:stacktest",
     "run:memorytest": "yarn run:basictest && yarn run:pointertest && yarn run:statictest",
-    "test": "yarn run:arithmetictest && yarn run:memorytest"
+    "test": "yarn run:arithmetictest && yarn run:memorytest",
+    "run:basicloop": "yarn run ts-node ./ ../08/ProgramFlow/BasicLoop/BasicLoop.vm",
+    "run:fibonacciseries": "yarn run ts-node ./ ../08/ProgramFlow/FibonacciSeries/FibonacciSeries.vm"
+
   },
   "devDependencies": {
     "@types/node": "^13.13.4",

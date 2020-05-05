@@ -44,7 +44,7 @@ export const getCommandType = (command: string): CommandTypes => {
       return C_LABEL
     case 'goto':
       return C_GOTO
-    case 'if':
+    case 'if-goto':
       return C_IF
     case 'function':
       return C_FUNCTION
@@ -121,11 +121,11 @@ export const writePushPop = (
   // push
   if (command === C_PUSH) {
     if (sig === S_TEMP)
-      return `//push temp ${arg}\n@${getTempIndex(
+      return `// push temp ${arg}\n@${getTempIndex(
         arg,
       )}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     if (sig === S_POINTER) {
-      return `//push pointer ${arg}\n@${getPointerIndex(
+      return `// push pointer ${arg}\n@${getPointerIndex(
         arg,
       )}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
@@ -133,8 +133,8 @@ export const writePushPop = (
       return `// push static ${arg}\n@static.${arg}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
     if (sig === S_CONSTANT)
-      return `//push constant ${arg}\n@${arg}\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1`
-    return `//push ${sig} ${arg}\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=D+A\nA=D\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+      return `// push constant ${arg}\n@${arg}\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+    return `// push ${sig} ${arg}\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=D+A\nA=D\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
   }
   return null
 }
@@ -180,12 +180,39 @@ export const writeArithmetic = (command: string) => {
   }
 }
 
+export const writeLabel = (labelName: string | null) => {
+  if (labelName == null) error('label is not found')
+  return `// add Label ${labelName}\n(${labelName})`
+}
+
+export const writeIfGoto = (labelName: string | null) => {
+  if (labelName == null) error('label is not found')
+  return `// if-goto ${labelName}\n@SP\nM=M-1\nA=M\nD=M\n@${labelName}\nD;JNE`
+}
+
+export const writeGoto = (labelName: string | null) => {
+  if (labelName == null) error('label is not found')
+  return `// goto ${labelName}\n@${labelName}\n0;JMP`
+}
+
 export const CodeWriter = (command: string, ...arg: (string | null)[]) => {
   const commandType = getCommandType(command)
   const code: string[] = []
   if (commandType === C_PUSH || commandType === C_POP) {
     const pushPopCode = writePushPop(command, arg[0], arg[1])
     pushPopCode != null && code.push(pushPopCode)
+  }
+  if (commandType === C_LABEL) {
+    const labelCode = writeLabel(arg[0])
+    labelCode !=null && code.push(labelCode)
+  }
+  if (commandType === C_GOTO) {
+    const gotoCode = writeGoto(arg[0])
+    gotoCode != null && code.push(gotoCode)
+  }
+  if (commandType === C_IF) {
+    const ifGotoCode = writeIfGoto(arg[0])
+    ifGotoCode != null && code.push(ifGotoCode)
   }
   if (commandType === C_ARITHMETIC) {
     const arithmeticCode = writeArithmetic(command)
