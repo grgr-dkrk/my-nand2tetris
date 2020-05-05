@@ -13,7 +13,9 @@
     "run:rectL": "ts-node ./ ./rect/RectL.asm",
     "test:notSymbols": "yarn run:add && yarn run:maxL && yarn run:pongL && yarn run:rectL",
     "test:symbols": "yarn run:max && yarn run:pong && yarn run:rect",
-    "test": "yarn test:notSymbols && yarn test:symbols"
+    "test:06": "yarn test:notSymbols && yarn test:symbols",
+    "run:basicloop": "yarn run ts-node ./ ./ProgramFlow/BasicLoop/BasicLoop.vm",
+    "run:fibonacciseries": "yarn run ts-node ./ ./ProgramFlow/FibonacciSeries/FibonacciSeries.vm"
   },
   "devDependencies": {
     "@types/node": "^13.13.4",
