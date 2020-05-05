@@ -17,6 +17,7 @@ import {
   S_THAT,
   S_TEMP,
   S_POINTER,
+  S_STATIC,
 } from './types'
 import { error } from './util'
 import { StackManager } from './stack'
@@ -79,6 +80,8 @@ export const setSignatureLavel = (sig: string) => {
       return 'TEMP'
     case S_POINTER:
       return 'POINTER'
+    case S_STATIC:
+      return 'STATIC'
     default:
       error(`signature ${sig} is invalid`)
       return ''
@@ -97,6 +100,9 @@ export const writePushPop = (
   if (command === C_POP) {
     if (sig === S_TEMP)
       return `// pop temp ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${arg ? parseInt(arg) + 5 : 5}\nM=D`
+    if (sig === S_STATIC) {
+      return `// pop static ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@static.${arg}\nM=D`
+    }
     if (sig === S_POINTER) return `// pop pointer ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${arg ? parseInt(arg) + 3 : 3}\nM=D`
     return `// pop ${sig} ${arg}\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=D+A\n@${signatureLabel}\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@${signatureLabel}\nA=M\nM=D\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=A-D\n@${signatureLabel}\nM=D`
   }
@@ -106,6 +112,9 @@ export const writePushPop = (
       return `//push temp ${arg}\n@${arg ? parseInt(arg) + 5 : 5}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     if (sig === S_POINTER) {
       return `//push pointer ${arg}\n@${arg ? parseInt(arg) + 3 : 3}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+    }
+    if (sig === S_STATIC) {
+      return `// push static ${arg}\n@static.${arg}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
     if (sig === S_CONSTANT)
       return `//push constant ${arg}\n@${arg}\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1`
