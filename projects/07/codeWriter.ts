@@ -101,6 +101,7 @@ export const writePushPop = (
   command: string,
   sig: string | null,
   arg: string | null,
+  currentFunctionName?: string,
 ) => {
   if (sig == null) return error(`sig: ${sig} is invalid.`)
   const signatureLabel = setSignatureLavel(sig)
@@ -116,7 +117,11 @@ export const writePushPop = (
         arg,
       )}\nM=D`
     if (sig === S_STATIC) {
-      return `// pop static ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@static.${arg}\nM=D`
+      return `// pop ${
+        currentFunctionName || 'static'
+      } ${arg}\n@SP\nM=M-1\nA=M\nD=M\n@${
+        currentFunctionName || 'static'
+      }.${arg}\nM=D`
     }
     return `// pop ${sig} ${arg}\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=D+A\n@${signatureLabel}\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@${signatureLabel}\nA=M\nM=D\n@${arg}\nD=A\n@${signatureLabel}\nA=M\nD=A-D\n@${signatureLabel}\nM=D`
   }
@@ -132,7 +137,9 @@ export const writePushPop = (
       )}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
     if (sig === S_STATIC) {
-      return `// push static ${arg}\n@static.${arg}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
+      return `// push ${currentFunctionName || 'static'} ${arg}\n@${
+        currentFunctionName || 'static'
+      }.${arg}\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1`
     }
     if (sig === S_CONSTANT)
       return `// push constant ${arg}\n@${arg}\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1`
@@ -185,33 +192,53 @@ export const writeArithmetic = (command: string) => {
 export const writeLabel = (labelName: string | null) => {
   if (labelName == null) error('label is not found')
   const functionName = StackManager.getCurrentFunctionName()
-  return `// add Label ${functionName && `${functionName}$`}${labelName}\n(${functionName && `${functionName}$`}${labelName})`
+  return `// add Label ${functionName && `${functionName}$`}${labelName}\n(${
+    functionName && `${functionName}$`
+  }${labelName})`
 }
 
 export const writeIfGoto = (labelName: string | null) => {
   if (labelName == null) error('label is not found')
   const functionName = StackManager.getCurrentFunctionName()
-  return `// if-goto ${functionName && `${functionName}$`}${labelName}\n@SP\nM=M-1\nA=M\nD=M\n@${functionName && `${functionName}$`}${labelName}\nD;JNE`
+  return `// if-goto ${
+    functionName && `${functionName}$`
+  }${labelName}\n@SP\nM=M-1\nA=M\nD=M\n@${
+    functionName && `${functionName}$`
+  }${labelName}\nD;JNE`
 }
 
 export const writeGoto = (labelName: string | null) => {
   if (labelName == null) error('label is not found')
   const functionName = StackManager.getCurrentFunctionName()
-  return `// goto ${functionName && `${functionName}$`}${labelName}\n@${functionName && `${functionName}$`}${labelName}\n0;JMP`
+  return `// goto ${functionName && `${functionName}$`}${labelName}\n@${
+    functionName && `${functionName}$`
+  }${labelName}\n0;JMP`
 }
 
-export const writeFunction = (labelName: string | null,  sig: string | null, local: string | null) => {
+export const writeFunction = (
+  labelName: string | null,
+  sig: string | null,
+  local: string | null,
+) => {
   if (labelName == null) return error('label is not found')
   if (sig == null) return error(`sig: ${sig} is invalid.`)
-  if (local == null || !isFinite(parseInt(local, 10))) return error(`local: ${local} on ${sig} is not int.`)
-  const code = new Array(parseInt(local, 10)).fill('').reduce((acc => `${acc}\n@SP\nA=M\nM=0\n@SP\nM=M+1`), '')
+  if (local == null || !isFinite(parseInt(local, 10)))
+    return error(`local: ${local} on ${sig} is not int.`)
+  const code = new Array(parseInt(local, 10))
+    .fill('')
+    .reduce((acc) => `${acc}\n@SP\nA=M\nM=0\n@SP\nM=M+1`, '')
   StackManager.setCurrentFunctionName(sig)
   return `// function ${sig}\n(${sig})${code}`
 }
 
-export const writeCall = (sig: string | null, local: string | null, callId: string) => {
+export const writeCall = (
+  sig: string | null,
+  local: string | null,
+  callId: string,
+) => {
   if (sig == null) return error(`sig: ${sig} is invalid.`)
-  if (local == null || !isFinite(parseInt(local, 10))) return error(`local: ${local} on ${sig} is not int.`)
+  if (local == null || !isFinite(parseInt(local, 10)))
+    return error(`local: ${local} on ${sig} is not int.`)
   return `// call ${sig}\n@RETURN${callId}\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\nD=M\n@${local}\nD=D-A\n@5\nD=D-A\n@ARG\nM=D\n@SP\nD=M\n@LCL\nM=D\n@${sig}\n0;JMP\n(RETURN${callId})`
 }
 
@@ -219,16 +246,20 @@ export const writeReturn = () => {
   return `// return\n@LCL\nD=M\n@frame\nM=D\n@5\nD=D-A\nA=D\nD=M\n@ret\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@ARG\nA=M\nM=D\n@ARG\nD=M+1\n@SP\nM=D\n@frame\nD=M\n@1\nD=D-A\nA=D\nD=M\n@THAT\nM=D\n@frame\nD=M\n@2\nD=D-A\nA=D\nD=M\n@THIS\nM=D\n@frame\nD=M\n@3\nD=D-A\nA=D\nD=M\n@ARG\nM=D\n@frame\nD=M\n@4\nD=D-A\nA=D\nD=M\n@LCL\nM=D\n@ret\nA=M\n0;JMP`
 }
 
-export const CodeWriter = (command: string, ...arg: (string | null)[]) => {
+export const CodeWriter = (
+  command: string,
+  className?: string,
+  ...arg: (string | null)[]
+) => {
   const commandType = getCommandType(command)
   const code: string[] = []
   if (commandType === C_PUSH || commandType === C_POP) {
-    const pushPopCode = writePushPop(command, arg[0], arg[1])
+    const pushPopCode = writePushPop(command, arg[0], arg[1], className)
     pushPopCode != null && code.push(pushPopCode)
   }
   if (commandType === C_LABEL) {
     const labelCode = writeLabel(arg[0])
-    labelCode !=null && code.push(labelCode)
+    labelCode != null && code.push(labelCode)
   }
   if (commandType === C_GOTO) {
     const gotoCode = writeGoto(arg[0])

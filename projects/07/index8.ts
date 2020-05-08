@@ -15,14 +15,18 @@ const main = () => {
   if (hasSysInit) {
     lines.push(createBootstrap())
   }
+  // vm classes
   dir.forEach((filePath) => {
     if (!filePath.endsWith('.vm')) return
     if (filePath === SYS_INIT) return
     const file = fs.readFileSync(path.resolve(root, filePath), {
       encoding: 'utf-8',
     })
-    lines.push(Parser(file))
+    const className = filePath.replace('.vm', '')
+    console.log(`parse static: ${className}`)
+    lines.push(Parser(file, className))
   })
+  // sys
   if (hasSysInit) {
     const sys = readFileSync(path.resolve(root, SYS_INIT), {
       encoding: 'utf-8',
