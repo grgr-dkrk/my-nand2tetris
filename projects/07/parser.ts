@@ -1,4 +1,5 @@
 import { CodeWriter } from './codeWriter'
+import { StackManager } from './stack'
 
 export const formatLine = (line: string) =>
   line.trimLeft().split('//')[0].trim()
@@ -10,7 +11,7 @@ export const getArg2 = (spilitedLine: string[]) =>
   spilitedLine && spilitedLine[2] ? spilitedLine[2] : null
 
 
-export const iterateLines = (lines: string[]) => {
+export const iterateLines = (lines: string[], className?: string) => {
   const dest: unknown[] = []
   lines.forEach((line_, index) => {
     const line = formatLine(line_)
@@ -27,14 +28,15 @@ export const iterateLines = (lines: string[]) => {
       }`,
     )
     if (!command) return
-    const code = CodeWriter(command, arg1, arg2)
+    const code = CodeWriter(command, className, arg1, arg2)
     if (!code) return
     dest.push(code)
   })
+  StackManager.setCurrentFunctionName('')
   return dest.join('\n')
 }
 
-export const Parser = (body: string) => {
+export const Parser = (body: string, className?: string) => {
   const lines = body.split('\n')
-  return iterateLines(lines)
+  return iterateLines(lines, className)
 }

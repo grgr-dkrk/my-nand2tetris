@@ -15,7 +15,9 @@
     "run:basicloop": "yarn run ts-node ./ ../08/ProgramFlow/BasicLoop/BasicLoop.vm",
     "run:fibonacciseries": "yarn run ts-node ./ ../08/ProgramFlow/FibonacciSeries/FibonacciSeries.vm",
     "run:simplefunction": "yarn run ts-node ./ ../08/FunctionCalls/SimpleFunction/SimpleFunction.vm",
-    "run:fibonaccielementfunction": "yarn run ts-node ./ ../08/FunctionCalls/FibonacciElement/Main.vm"
+    "run:fibonaccielementfunction": "yarn run ts-node ./index8.ts ../08/FunctionCalls/FibonacciElement/ FibonacciElement",
+    "run:nestedcall": "yarn run ts-node ./index8.ts ../08/FunctionCalls/NestedCall/ NestedCall",
+    "run:staticstest": "yarn run ts-node ./index8.ts ../08/FunctionCalls/StaticsTest/ StaticsTest"
   },
   "devDependencies": {
     "@types/node": "^13.13.4",

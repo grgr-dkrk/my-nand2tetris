@@ -17,6 +17,13 @@ export const getFileText = (path: string) => {
   return readFile
 }
 
+export const getFileDir = (path: string) => {
+  const dir = fs.readdirSync(path, { encoding: 'utf-8' })
+  if (!fs.statSync(path).isDirectory()) error('not dir')
+  console.log('getFileText: ok')
+  return dir
+}
+
 export const convertIntToBinaryString = (str: string): string | void => {
   const int = parseInt(str, 10)
   if (!isFinite(int)) return
