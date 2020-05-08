@@ -1,4 +1,4 @@
-//push constant 10
+// push constant 10
 @10
 D=A
 @SP
@@ -28,7 +28,7 @@ A=M
 D=A-D
 @LCL
 M=D
-//push constant 21
+// push constant 21
 @21
 D=A
 @SP
@@ -36,7 +36,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push constant 22
+// push constant 22
 @22
 D=A
 @SP
@@ -88,7 +88,7 @@ A=M
 D=A-D
 @ARG
 M=D
-//push constant 36
+// push constant 36
 @36
 D=A
 @SP
@@ -118,7 +118,7 @@ A=M
 D=A-D
 @THIS
 M=D
-//push constant 42
+// push constant 42
 @42
 D=A
 @SP
@@ -126,7 +126,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push constant 45
+// push constant 45
 @45
 D=A
 @SP
@@ -178,7 +178,7 @@ A=M
 D=A-D
 @THAT
 M=D
-//push constant 510
+// push constant 510
 @510
 D=A
 @SP
@@ -193,7 +193,7 @@ A=M
 D=M
 @11
 M=D
-//push local 0
+// push local 0
 @0
 D=A
 @LCL
@@ -206,7 +206,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push that 5
+// push that 5
 @5
 D=A
 @THAT
@@ -232,7 +232,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push argument 1
+// push argument 1
 @1
 D=A
 @ARG
@@ -258,7 +258,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push this 6
+// push this 6
 @6
 D=A
 @THIS
@@ -271,7 +271,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push this 6
+// push this 6
 @6
 D=A
 @THIS
@@ -310,7 +310,7 @@ A=M
 M=D
 @SP
 M=M+1
-//push temp 6
+// push temp 6
 @11
 D=M
 @SP
