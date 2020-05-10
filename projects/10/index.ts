@@ -1,6 +1,6 @@
 import { checkArgv, getFileDir } from "./util";
 import path from "path";
-import fs, { readFileSync } from "fs";
+import fs from "fs";
 import { Tokenizer } from "./tokenizer";
 import { Splitter } from "./splitter";
 import { XMLCreator } from "./xmlCreator";
@@ -14,11 +14,16 @@ const main = () => {
     const file = fs.readFileSync(path.resolve(root, filePath), {
       encoding: "utf-8",
     });
-    const tokenizedString = Tokenizer(Splitter(file), XMLCreator);
+    console.log(`start: ${filePath}`)
+    const tokenizedString = Tokenizer(Splitter(file));
+    console.log(tokenizedString);
+
+    const tokenizedXML = XMLCreator(tokenizedString);
     fs.writeFileSync(
-      path.resolve(__dirname, `Results/${filePath.replace('.jack', 'T.xml')}`),
-      tokenizedString
+      path.resolve(__dirname, `Results/${filePath.replace(".jack", "T.xml")}`),
+      tokenizedXML
     );
+    console.log(`completed: ${filePath}`)
   });
 };
 

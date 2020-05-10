@@ -63,10 +63,7 @@ export const setIdentifier = () => {
   );
 };
 
-export const Tokenizer = (
-  tokens: string[],
-  callback: (dest: Map<string, string>) => string
-) => {
+export const Tokenizer = (tokens: string[]) => {
   const advance = () => {
     TokenManager.setTokenList(tokens);
     if (isKeyword(TokenManager.getToken())) {
@@ -84,6 +81,5 @@ export const Tokenizer = (
     if (TokenManager.getIndex() <= tokens.length - 1) advance();
   };
   if (TokenManager.getIndex() <= tokens.length - 1) advance();
-  console.log(TokenManager.getTokenMap());
-  return callback(TokenManager.getTokenMap())
+  return TokenManager.getTokenMap()
 };
