@@ -29,3 +29,6 @@ export const convertIntToBinaryString = (str: string): string | void => {
   if (!isFinite(int)) return
   return int.toString(2).padStart(16, '0')
 }
+
+export const escapeJackString = (token: string) =>
+  token.replace(/&/, "&amp;").replace(/</, "&lt;").replace(/>/, "&gt;");
