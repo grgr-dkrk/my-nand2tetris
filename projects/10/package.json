@@ -4,7 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node ./"
+    "start": "ts-node ./",
+    "tokenized:Square": "ts-node ./ ./Square && sh ../../tools/TextComparer.sh ./Results/MainT.xml ./Square/MainT.xml",
+    "tokenized:ArrayTest": "ts-node ./ ./ArrayTest && sh ../../tools/TextComparer.sh ./Results/MainT.xml ./ArrayTest/MainT.xml",
+    "tokenized": "yarn tokenized:Square && yarn tokenized:ArrayTest"
   },
   "devDependencies": {
     "@types/node": "^13.13.5",

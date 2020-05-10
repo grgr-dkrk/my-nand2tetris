@@ -1,8 +1,9 @@
 import { SYMBOLS, KEYWORDS } from "./constants";
+import { TokenManager } from "./TokenManager";
 
 export const TYPE_KEYWORD = "keyword" as const;
 export const TYPE_SYMBOL = "symbol" as const;
-export const TYPE_IDENTIFER = "identifer" as const;
+export const TYPE_IDENTIFER = "identifier" as const;
 export const TYPE_INT_CONST = "integerConstant" as const;
 export const TYPE_STRING_CONST = "stringConstant" as const;
 
@@ -19,34 +20,7 @@ export const getTokenType = (token: string) => {
   if (isSymbol(token)) return TYPE_SYMBOL;
 };
 export const isClass = (token: string) => token === KEYWORD_CLASS;
-
 export const parseClass = () => {};
-
-export const TokenManager = (() => {
-  let index = 0;
-  let tokenList: string[] = [];
-  const tokenMap = new Map<string, string>();
-  return {
-    setTokenList(newTokenList: string[]) {
-      tokenList = newTokenList;
-    },
-    setTokenMap(key: string, value: string) {
-      tokenMap.set(key, value);
-    },
-    getTokenMap() {
-      return tokenMap;
-    },
-    getIndex() {
-      return index;
-    },
-    getToken(index?: number) {
-      return index ? tokenList[index] : tokenList[this.getIndex()];
-    },
-    addIndex() {
-      index++;
-    },
-  };
-})();
 
 export const setKeyWord = () => {
   TokenManager.setTokenMap(
@@ -87,8 +61,7 @@ export const setIdentifier = () => {
     `${TYPE_IDENTIFER}${TokenManager.getIndex()}`,
     TokenManager.getToken()
   );
-}
-
+};
 
 export const Tokenizer = (
   tokens: string[],
@@ -112,4 +85,5 @@ export const Tokenizer = (
   };
   if (TokenManager.getIndex() <= tokens.length - 1) advance();
   console.log(TokenManager.getTokenMap());
+  return callback(TokenManager.getTokenMap())
 };
