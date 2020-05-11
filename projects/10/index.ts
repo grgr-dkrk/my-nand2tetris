@@ -34,7 +34,7 @@ const main = () => {
 
     if (process.argv[3] && process.argv[3] !== "--skipCompileXML") {
       console.log(`compile generating: ${filePath}`);
-      const compileXML = Compilation(tokenizedString);
+      const compileXML = Compilation();
       fs.writeFileSync(
         path.resolve(
           __dirname,
@@ -44,7 +44,7 @@ const main = () => {
       );
     }
     console.log(`completed: ${filePath}`);
-    Initiarize(filePath)
+    Initiarize(filePath);
   });
 };
 

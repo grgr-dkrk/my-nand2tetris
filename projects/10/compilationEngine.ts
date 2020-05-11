@@ -3,10 +3,6 @@ import { XMLManager } from "./XMLManager";
 
 type TagPos = "both" | "open" | "close";
 
-export const advance = () => {
-  TokenManager.nextTokenMap();
-};
-
 export const getTokenKey = () => {
   const [key, _] = TokenManager.getNextTokenMap().value;
   return key.replace(/[0-9]/g, "");
@@ -17,18 +13,17 @@ export const getTokenValue = () => {
   return value;
 };
 
-export const isClassVarDec = () => /(static|field)/.test(getTokenValue());
+export const advance = () => {
+  TokenManager.nextTokenMap();
+};
 
+export const isClassVarDec = () => /(static|field)\b/.test(getTokenValue());
 export const isVarDec = () => /var\b/.test(getTokenValue());
-
 export const isSubroutine = () =>
-  /(constructor|function|method)/.test(getTokenValue());
-
-export const isEndComma = () => getTokenValue() === ";";
-export const isStartParenthesis = () => getTokenValue() === "(";
-export const isEndParenthesis = () => getTokenValue() === ")";
-export const isStartBrace = () => getTokenValue() === "{";
-export const isEndBrace = () => getTokenValue() === "}";
+  /(constructor|function|method)\b/.test(getTokenValue());
+export const isStatement = () => {
+  /(let|if|while|do|return)\b/.test(getTokenValue());
+};
 
 export const addXMLList = (tagName: string, tagPos: TagPos = "both") => {
   const value = getTokenValue();
@@ -38,6 +33,16 @@ export const addXMLList = (tagName: string, tagPos: TagPos = "both") => {
     }${tagPos !== "open" ? `</${tagName}>` : ""}`
   );
 };
+
+export const isEndComma = () => getTokenValue() === ";";
+export const isStartParenthesis = () => getTokenValue() === "(";
+export const isEndParenthesis = () => getTokenValue() === ")";
+export const isStartBrace = () => getTokenValue() === "{";
+export const isEndBrace = () => getTokenValue() === "}";
+export const isStartBracket = () => getTokenValue() === "[";
+export const isEndBracket = () => getTokenValue() === "]";
+export const isEqualSymbol = () => getTokenValue() === "=";
+export const isPipeSymbol = () => getTokenValue() === "|";
 
 export const compileClass = () => {
   addXMLList("class", "open");
@@ -99,8 +104,9 @@ export const compileSubroutineBody = () => {
       compileVarDec();
       continue;
     }
-    addXMLList(getTokenKey());
+    compileStatements();
   }
+  addXMLList(getTokenKey()); // }
   addXMLList("subroutineBody", "close");
 };
 
@@ -116,6 +122,7 @@ export const compileParameterList = () => {
   addXMLList("parameterList", "close");
   addXMLList(getTokenKey()); // )
 };
+
 export const compileSubroutine = () => {
   addXMLList("subroutineDec", "open");
   addXMLList("keyword");
@@ -135,15 +142,146 @@ export const compileSubroutine = () => {
   }
   addXMLList("subroutineDec", "close");
 };
-export const compileStatements = () => {};
-export const compileDo = () => {};
-export const compileLet = () => {};
-export const compileWhile = () => {};
-export const compileReturn = () => {};
-export const compileIf = () => {};
-export const compileExpression = () => {};
-export const compileTerm = () => {};
-export const compileExpressionList = () => {};
+export const compileStatements = () => {
+  addXMLList("statements", "open");
+  while (!isEndBrace()) {
+    switch (getTokenValue()) {
+      case "let":
+        compileLet();
+        continue;
+      case "if":
+        compileIf();
+        continue;
+      case "while":
+        compileWhile();
+        continue;
+      case "do":
+        compileDo();
+        continue;
+      case "return":
+        compileReturn();
+        continue;
+      default:
+        console.log(`statements is break: ${getTokenValue()}`);
+        break;
+    }
+    advance();
+  }
+  addXMLList("statements", "close");
+};
+export const compileLet = () => {
+  addXMLList("letStatement", "open");
+  addXMLList(getTokenKey()); // let
+  while (!isEndComma()) {
+    advance();
+    if (isStartBracket()) {
+      addXMLList(getTokenKey()); // [
+      advance();
+      compileExpression(isEndBracket);
+      addXMLList(getTokenKey()); // ]
+      continue;
+    }
+    if (isEqualSymbol()) {
+      addXMLList(getTokenKey()); // =
+      advance();
+      compileExpression(isEndComma);
+      addXMLList(getTokenKey()); // ;
+      continue;
+    }
+    addXMLList(getTokenKey());
+  }
+  addXMLList("letStatement", "close");
+};
+export const compileIf = () => {
+  addXMLList("ifStatement", "open");
+  addXMLList(getTokenKey()); // if
+  advance();
+  addXMLList(getTokenKey()); // (
+  advance();
+  compileExpression(isEndParenthesis);
+  addXMLList(getTokenKey()); // )
+  advance();
+  addXMLList(getTokenKey()); // {
+  advance();
+  compileStatements();
+  addXMLList(getTokenKey()); // }
+  advance();
+  if (getTokenValue() === "else") {
+    addXMLList(getTokenKey()); // else
+    advance();
+    addXMLList(getTokenKey()); // {
+    advance();
+    compileStatements();
+    addXMLList(getTokenKey()); // }
+  }
+  addXMLList("ifStatement", "close");
+  advance()
+};
+export const compileDo = () => {
+  addXMLList("doStatement", "open");
+  addXMLList(getTokenKey()); // do
+  // subroutineCall
+  while (!isEndComma()) {
+    advance();
+    if (isStartParenthesis()) {
+      addXMLList(getTokenKey()); // (
+      compileExpressionList();
+      addXMLList(getTokenKey()); // )
+      continue;
+    }
+    addXMLList(getTokenKey());
+  }
+  addXMLList("doStatement", "close");
+  advance();
+};
+export const compileWhile = () => {
+  addXMLList(getTokenKey());
+  advance();
+};
+export const compileReturn = () => {
+  addXMLList("returnStatement", "open");
+  addXMLList(getTokenKey()); // return
+  advance();
+  if (isEndComma()) {
+    addXMLList(getTokenKey()); // ;
+  } else {
+    compileExpression(isEndComma)
+    addXMLList(getTokenKey()); // ;
+  }
+  addXMLList("returnStatement", "close");
+  advance();
+};
+export const compileExpression = (endCondition: () => boolean) => {
+  addXMLList("expression", "open");
+  compileTerm(endCondition);
+  addXMLList("expression", "close");
+};
+export const compileTerm = (endCondition: () => boolean) => {
+  addXMLList("term", "open");
+  while (true) {
+    if (isPipeSymbol()) {
+      addXMLList("term", "close");
+      addXMLList(getTokenKey());
+      advance();
+      compileTerm(endCondition)
+      break;
+    }
+    if(endCondition()) {
+      addXMLList("term", "close");
+      break;
+    }
+    addXMLList(getTokenKey());
+    advance();
+  }
+};
+export const compileExpressionList = () => {
+  addXMLList("expressionList", "open");
+  advance();
+  while (!isEndParenthesis()) {
+    compileExpression(isEndParenthesis)
+  }
+  addXMLList("expressionList", "close");
+};
 
 export const iterateComplation = () => {
   const [key, value] = TokenManager.getNextTokenMap().value;
@@ -157,7 +295,7 @@ export const iterateComplation = () => {
   advance();
 };
 
-export const Compilation = (tokenMap: Map<string, string>) => {
+export const Compilation = () => {
   let index = 0;
   const dest: any[] = [];
   TokenManager.createTokenMapIterator();
@@ -165,5 +303,5 @@ export const Compilation = (tokenMap: Map<string, string>) => {
     iterateComplation();
   }
   console.log(XMLManager.getXMLList());
-  return XMLManager.getXMLList().join('\n')
+  return XMLManager.getXMLList().join("\n");
 };
