@@ -236,8 +236,20 @@ export const compileDo = () => {
   advance();
 };
 export const compileWhile = () => {
-  addXMLList(getTokenKey());
+  addXMLList("whileStatement", "open");
+  addXMLList(getTokenKey()); // while
   advance();
+  addXMLList(getTokenKey()); // (
+  advance();
+  compileExpression(isEndParenthesis);
+  addXMLList(getTokenKey()); // )
+  advance();
+  addXMLList(getTokenKey()); // {
+  advance();
+  compileStatements()
+  addXMLList(getTokenKey()); // }
+  advance();
+  addXMLList("whileStatement", "close");
 };
 export const compileReturn = () => {
   addXMLList("returnStatement", "open");
@@ -266,6 +278,16 @@ export const compileTerm = (endCondition: () => boolean) => {
       advance();
       compileTerm(endCondition)
       break;
+    }
+    if (isStartParenthesis()) {
+      addXMLList(getTokenKey());
+      compileExpressionList()
+    }
+    if (isStartBracket()) {
+      addXMLList(getTokenKey()); // [
+      advance();
+      compileExpression(isEndBracket);
+      continue;
     }
     if(isCommaSymbol()) {
       addXMLList("term", "close");
