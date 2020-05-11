@@ -9,8 +9,6 @@ export const TYPE_STRING_CONST = "stringConstant" as const;
 
 const KEYWORD_CLASS = "class" as const;
 
-export const setTokenType = (token: string) => {};
-
 export const isKeyword = (token: string) => KEYWORDS.test(token);
 export const isSymbol = (token: string) => SYMBOLS.test(token);
 export const isInt = (token: string) => isFinite(parseInt(token, 10));
