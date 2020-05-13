@@ -26,6 +26,9 @@ export const TokenManager = (() => {
       });
       iterIndex = 0;
     },
+    getLookAheadTokenMap() {
+      return iter[iterIndex + 1];
+    },
     getNextTokenMap() {
       return iter[iterIndex];
     },
