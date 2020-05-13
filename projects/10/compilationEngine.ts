@@ -4,17 +4,22 @@ import { XMLManager } from "./XMLManager";
 type TagPos = "both" | "open" | "close";
 
 export const getTokenKey = () => {
-  const [key, _] = TokenManager.getNextTokenMap().value;
+  const key = TokenManager.getNextTokenMap()[0];
   return key.replace(/[0-9]/g, "");
 };
 
 export const getTokenValue = () => {
-  const [_, value] = TokenManager.getNextTokenMap().value;
+  const value = TokenManager.getNextTokenMap()[1];
   return value;
 };
 
 export const advance = () => {
   TokenManager.nextTokenMap();
+};
+
+export const lookahead = (): [string, string] | null => {
+  const value = TokenManager.getLookAheadTokenMap();
+  return value || null;
 };
 
 export const isClassVarDec = () => /(static|field)\b/.test(getTokenValue());
@@ -45,6 +50,23 @@ export const isEqualSymbol = () => getTokenValue() === "=";
 export const isSemicolonSymbol = () => getTokenValue() === ";";
 export const isCommaSymbol = () => getTokenValue() === ",";
 export const isPipeSymbol = () => getTokenValue() === "|";
+
+export const hasDotLookAhead = () => {
+  const lookAhead = lookahead();
+  return !!lookAhead && lookAhead[1] === ".";
+};
+export const hasStartBracketAhead = () => {
+  const lookAhead = lookahead();
+  return !!lookAhead && lookAhead[1] === "[";
+};
+export const hasStartParenthesisAhead = () => {
+  const lookAhead = lookahead();
+  return !!lookAhead && lookAhead[1] === "(";
+};
+export const hasUnaryOp = () => {
+  const lookAhead = getTokenValue();
+  return !!lookAhead && /(\-|\~)/.test(lookAhead);
+};
 
 export const hasSymbolKey = () => getTokenKey() === "symbol";
 export const hasIdentifierKey = () => getTokenKey() === "identifier";
@@ -289,6 +311,14 @@ export const compileReturn = () => {
 // expression
 export const compileExpression = (endCondition: () => boolean) => {
   addXMLList("expression", "open");
+  if (hasUnaryOp()) {
+    addXMLList("term", "open");
+    addXMLList(getTokenKey()); // unaryOp
+    advance();
+    compileTerm();
+    addXMLList("term", "close");
+    advance();
+  }
   while (!endCondition()) {
     if (isOp()) {
       addXMLList(getTokenKey()); // op
@@ -301,13 +331,6 @@ export const compileExpression = (endCondition: () => boolean) => {
     advance();
   }
   addXMLList("expression", "close");
-};
-
-// term
-export const compileTerm = () => {
-  addXMLList("term", "open");
-  addXMLList(getTokenKey());
-  addXMLList("term", "close");
 };
 
 // expressionList
@@ -324,14 +347,43 @@ export const compileExpressionList = () => {
   addXMLList("expressionList", "close");
 };
 
-export const iterateComplation = () => {
-  const [key, value] = TokenManager.getNextTokenMap().value;
-  const formattedKey = key.replace(/[0-9]/g, "");
-  if (formattedKey === "keyword" && value === "class") {
-    compileClass();
+export const compileIdentifierOnTerm = () => {
+  if (hasDotLookAhead()) {
+    advance();
+    addXMLList(getTokenKey()); //.
+    advance();
+    addXMLList(getTokenKey()); // new
+    advance();
+    addXMLList(getTokenKey()); // (
+    compileExpressionList();
+    addXMLList(getTokenKey()); // )
   }
-  if (formattedKey === "keyword" && value === "field") {
-    XMLManager.addXMLList(formattedKey);
+  if (hasStartBracketAhead()) {
+    advance();
+    addXMLList(getTokenKey()); // [
+    advance();
+    compileExpression(isEndBracket);
+    addXMLList(getTokenKey()); // ]
+  }
+};
+
+// term
+export const compileTerm = () => {
+  addXMLList("term", "open");
+  addXMLList(getTokenKey());
+  if (hasIdentifierKey()) compileIdentifierOnTerm();
+  if (isStartParenthesis()) {
+    // (
+    advance();
+    compileExpression(isEndParenthesis);
+    addXMLList(getTokenKey()); // )
+  }
+  addXMLList("term", "close");
+};
+
+export const iterateComplation = () => {
+  if (getTokenKey() === "keyword" && getTokenValue() === "class") {
+    compileClass();
   }
   advance();
 };
