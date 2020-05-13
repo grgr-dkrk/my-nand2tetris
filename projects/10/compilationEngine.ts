@@ -4,12 +4,12 @@ import { XMLManager } from "./XMLManager";
 type TagPos = "both" | "open" | "close";
 
 export const getTokenKey = () => {
-  const [key, _] = TokenManager.getNextTokenMap().value;
+  const key = TokenManager.getNextTokenMap()[0];
   return key.replace(/[0-9]/g, "");
 };
 
 export const getTokenValue = () => {
-  const [_, value] = TokenManager.getNextTokenMap().value;
+  const value = TokenManager.getNextTokenMap()[1];
   return value;
 };
 
@@ -325,13 +325,8 @@ export const compileExpressionList = () => {
 };
 
 export const iterateComplation = () => {
-  const [key, value] = TokenManager.getNextTokenMap().value;
-  const formattedKey = key.replace(/[0-9]/g, "");
-  if (formattedKey === "keyword" && value === "class") {
+  if (getTokenKey() === "keyword" && getTokenValue() === "class") {
     compileClass();
-  }
-  if (formattedKey === "keyword" && value === "field") {
-    XMLManager.addXMLList(formattedKey);
   }
   advance();
 };
