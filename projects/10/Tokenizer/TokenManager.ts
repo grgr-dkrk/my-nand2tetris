@@ -5,6 +5,7 @@ export const TokenManager = (() => {
   let tokenList: string[] = [];
   let iter: [string, string][];
   let iterIndex = 0;
+  let className = "";
   const tokenMap = new Map<string, string>();
   return {
     setTokenList(newTokenList: string[]) {
@@ -12,6 +13,12 @@ export const TokenManager = (() => {
     },
     setTokenMap(key: string, value: string) {
       tokenMap.set(key, escapeJackString(value));
+    },
+    setClassName(newClassName: string) {
+      className = newClassName;
+    },
+    getClassName() {
+      return className;
     },
     getTokenMap() {
       return tokenMap;
@@ -47,9 +54,12 @@ export const TokenManager = (() => {
     addIndex() {
       index++;
     },
-    resetIndex() {
+    reset() {
+      tokenList = [];
+      tokenMap.clear();
       index = 0;
       iterIndex = 0;
+      className = ''
     },
   };
 })();

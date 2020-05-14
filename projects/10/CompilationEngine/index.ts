@@ -22,6 +22,7 @@ import {
   hasDotLookAhead,
   hasStartBracketAhead,
   hasIdentifierKey,
+  isMethod,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
 
@@ -62,18 +63,18 @@ export const compileClassVarDec = () => {
   addCompileXMLList("classVarDec", "open");
 
   // kind
-  addCompileXMLList(getTokenKey()); // static | field
   kind = getTokenValue() as SymbolKind // static | field
+  addCompileXMLList(getTokenKey()); // static | field
   advance();
 
   // type
-  addCompileXMLList(getTokenKey());
   type = getTokenValue();
+  addCompileXMLList(getTokenKey());
   advance();
 
   // name
-  addCompileXMLList(getTokenKey());
   name = getTokenValue();
+  addCompileXMLList(getTokenKey());
   advance();
 
   // define varDec
@@ -90,8 +91,8 @@ export const compileClassVarDec = () => {
     advance()
 
     // add name
-    addCompileXMLList(getTokenKey());
     name = getTokenValue();
+    addCompileXMLList(getTokenKey());
 
     if (name === ';' || name === ',') throw new Error(`invalid name ${name}`)
 
@@ -110,26 +111,30 @@ export const compileVarDec = () => {
 
   // keyword
   addCompileXMLList(getTokenKey()); // var
+  advance();
 
   // type
-  advance();
   type = getTokenValue()
-  addCompileXMLList(getTokenKey());
+  addCompileXMLList(getTokenKey()); // type
   advance();
 
   while (!isSemicolonSymbol()) {
+
+    // , 区切りはSymbolTableに不要なので、XMLにだけ追加
     if (isCommaSymbol()) {
-      addCompileXMLList(getTokenKey());
+      addCompileXMLList(getTokenKey()); // ,
       advance()
       continue;
     }
+
     // identifier
     name = getTokenValue()
-    addCompileXMLList(getTokenKey());
     SymbolTable.define(name, type, SymbolKind.Var)
+    addCompileXMLList(getTokenKey()); // identifier
     advance()
   }
-  addCompileXMLList(getTokenKey());
+
+  addCompileXMLList(getTokenKey()); // ;
   addCompileXMLList("varDec", "close");
 };
 
@@ -175,6 +180,14 @@ export const compileParameterList = () => {
 export const compileSubroutine = () => {
   addCompileXMLList("subroutineDec", "open");
   addCompileXMLList("keyword");
+
+  // kind
+  advance()
+  addCompileXMLList(getTokenKey()); // constructor | function | method
+  if (isMethod()) {
+    SymbolTable.define('self', TokenManager.getClassName(), SymbolKind.Argument)
+  }
+
   while (true) {
     advance();
     // parameterList
@@ -224,11 +237,19 @@ export const compileStatements = () => {
 
 // let
 export const compileLet = () => {
-  let kind: SymbolKind
-  let type: Type
+  let kind: SymbolKind | null
   let name: Name
+  let index: number | null
   addCompileXMLList("letStatement", "open");
   addCompileXMLList(getTokenKey()); // let
+
+  // name, kind, inedx
+  advance();
+  name = getTokenValue()
+  kind = SymbolTable.kindOf(name)
+  index = SymbolTable.indexOf(name)
+  addCompileXMLList(getTokenKey());
+
   while (!isSemicolonSymbol()) {
     advance();
     if (isStartBracket()) {
@@ -410,7 +431,8 @@ export const iterateComplation = () => {
   advance();
 };
 
-export const Compilation = () => {
+export const Compilation = (className: string) => {
+  TokenManager.setClassName(className);
   TokenManager.createTokenMapIterator();
   while (!TokenManager.getIsNextTokenMapDone()) {
     iterateComplation();

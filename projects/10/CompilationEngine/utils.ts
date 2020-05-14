@@ -50,6 +50,7 @@ export const isEqualSymbol = () => getTokenValue() === "=";
 export const isSemicolonSymbol = () => getTokenValue() === ";";
 export const isCommaSymbol = () => getTokenValue() === ",";
 export const isPipeSymbol = () => getTokenValue() === "|";
+export const isMethod = () => getTokenValue() === "method"
 
 export const hasDotLookAhead = () => {
   const lookAhead = lookahead();

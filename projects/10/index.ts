@@ -40,7 +40,7 @@ const main = () => {
      */
     if (process.argv[3] && process.argv[3] === "--compile") {
       console.log(`compile generating: ${filePath}`);
-      const compileXML = Compilation();
+      const compileXML = Compilation(filePath.replace(".jack", ""));
       fs.writeFileSync(
         path.resolve(
           __dirname,
