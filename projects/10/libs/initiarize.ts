@@ -5,6 +5,7 @@ export const Initiarize = (filePath: string) => {
   TokenManager.setTokenList([])
   TokenManager.resetTokenMap()
   TokenManager.resetIndex()
+  CompileManager.resetCompileXMLList()
   CompileManager.resetCompileList()
   console.log(`initiarized: ${filePath}`)
 }

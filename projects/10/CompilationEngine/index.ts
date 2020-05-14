@@ -1,7 +1,7 @@
 import { TokenManager } from "../Tokenizer/TokenManager";
 import { CompileManager } from "./CompileManager";
 import {
-  addCompileList,
+  addCompileXMLList,
   advance,
   isEndBrace,
   isClassVarDec,
@@ -25,8 +25,8 @@ import {
 } from "./utils";
 
 export const compileClass = () => {
-  addCompileList("class", "open");
-  addCompileList("keyword");
+  addCompileXMLList("class", "open");
+  addCompileXMLList("keyword");
   while (true) {
     advance();
     if (isEndBrace()) {
@@ -47,38 +47,38 @@ export const compileClass = () => {
       compileSubroutine();
       continue;
     }
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
   }
-  addCompileList("symbol");
-  addCompileList("class", "close");
+  addCompileXMLList("symbol");
+  addCompileXMLList("class", "close");
 };
 
 // classVarDec
 export const compileClassVarDec = () => {
-  addCompileList("classVarDec", "open");
-  addCompileList(getTokenKey()); // static | field
+  addCompileXMLList("classVarDec", "open");
+  addCompileXMLList(getTokenKey()); // static | field
   while (!isSemicolonSymbol()) {
     advance();
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
   }
-  addCompileList("classVarDec", "close");
+  addCompileXMLList("classVarDec", "close");
 };
 
 // varDec
 export const compileVarDec = () => {
-  addCompileList("varDec", "open");
-  addCompileList(getTokenKey()); // var
+  addCompileXMLList("varDec", "open");
+  addCompileXMLList(getTokenKey()); // var
   while (!isSemicolonSymbol()) {
     advance();
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
   }
-  addCompileList("varDec", "close");
+  addCompileXMLList("varDec", "close");
 };
 
 // subroutineBody
 export const compileSubroutineBody = () => {
-  addCompileList("subroutineBody", "open");
-  addCompileList(getTokenKey()); // {
+  addCompileXMLList("subroutineBody", "open");
+  addCompileXMLList(getTokenKey()); // {
   while (!isEndBrace()) {
     advance();
     if (isVarDec()) {
@@ -87,28 +87,28 @@ export const compileSubroutineBody = () => {
     }
     compileStatements();
   }
-  addCompileList(getTokenKey()); // }
-  addCompileList("subroutineBody", "close");
+  addCompileXMLList(getTokenKey()); // }
+  addCompileXMLList("subroutineBody", "close");
 };
 
 // parameterList
 export const compileParameterList = () => {
   // compileParameterList の終端記号はタグの外に置く
-  addCompileList(getTokenKey()); // (
-  addCompileList("parameterList", "open");
+  addCompileXMLList(getTokenKey()); // (
+  addCompileXMLList("parameterList", "open");
   advance();
   while (!isEndParenthesis()) {
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
     advance();
   }
-  addCompileList("parameterList", "close");
-  addCompileList(getTokenKey()); // )
+  addCompileXMLList("parameterList", "close");
+  addCompileXMLList(getTokenKey()); // )
 };
 
 // subRoutine
 export const compileSubroutine = () => {
-  addCompileList("subroutineDec", "open");
-  addCompileList("keyword");
+  addCompileXMLList("subroutineDec", "open");
+  addCompileXMLList("keyword");
   while (true) {
     advance();
     // parameterList
@@ -121,14 +121,14 @@ export const compileSubroutine = () => {
       compileSubroutineBody();
       break;
     }
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
   }
-  addCompileList("subroutineDec", "close");
+  addCompileXMLList("subroutineDec", "close");
 };
 
 // statements
 export const compileStatements = () => {
-  addCompileList("statements", "open");
+  addCompileXMLList("statements", "open");
   console.log(`token: ${getTokenValue()}`);
   while (!isEndBrace()) {
     switch (getTokenValue()) {
@@ -153,128 +153,128 @@ export const compileStatements = () => {
     }
     advance();
   }
-  addCompileList("statements", "close");
+  addCompileXMLList("statements", "close");
 };
 
 // let
 export const compileLet = () => {
-  addCompileList("letStatement", "open");
-  addCompileList(getTokenKey()); // let
+  addCompileXMLList("letStatement", "open");
+  addCompileXMLList(getTokenKey()); // let
   while (!isSemicolonSymbol()) {
     advance();
     if (isStartBracket()) {
-      addCompileList(getTokenKey()); // [
+      addCompileXMLList(getTokenKey()); // [
       advance();
       compileExpression(isEndBracket);
-      addCompileList(getTokenKey()); // ]
+      addCompileXMLList(getTokenKey()); // ]
       continue;
     }
     if (isEqualSymbol()) {
-      addCompileList(getTokenKey()); // =
+      addCompileXMLList(getTokenKey()); // =
       advance();
       compileExpression(isSemicolonSymbol);
-      addCompileList(getTokenKey()); // ;
+      addCompileXMLList(getTokenKey()); // ;
       continue;
     }
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
   }
-  addCompileList("letStatement", "close");
+  addCompileXMLList("letStatement", "close");
 };
 
 // if
 export const compileIf = () => {
-  addCompileList("ifStatement", "open");
-  addCompileList(getTokenKey()); // if
+  addCompileXMLList("ifStatement", "open");
+  addCompileXMLList(getTokenKey()); // if
   advance();
-  addCompileList(getTokenKey()); // (
+  addCompileXMLList(getTokenKey()); // (
   advance();
   compileExpression(isEndParenthesis);
-  addCompileList(getTokenKey()); // )
+  addCompileXMLList(getTokenKey()); // )
   advance();
-  addCompileList(getTokenKey()); // {
+  addCompileXMLList(getTokenKey()); // {
   advance();
   compileStatements();
-  addCompileList(getTokenKey()); // }
+  addCompileXMLList(getTokenKey()); // }
   advance();
   if (getTokenValue() === "else") {
-    addCompileList(getTokenKey()); // else
+    addCompileXMLList(getTokenKey()); // else
     advance();
-    addCompileList(getTokenKey()); // {
+    addCompileXMLList(getTokenKey()); // {
     advance();
     compileStatements();
-    addCompileList(getTokenKey()); // }
+    addCompileXMLList(getTokenKey()); // }
     advance();
   }
-  addCompileList("ifStatement", "close");
+  addCompileXMLList("ifStatement", "close");
 };
 
 // do
 export const compileDo = () => {
-  addCompileList("doStatement", "open");
-  addCompileList(getTokenKey()); // do
+  addCompileXMLList("doStatement", "open");
+  addCompileXMLList(getTokenKey()); // do
   // subroutineCall
   while (!isSemicolonSymbol()) {
     advance();
     if (isStartParenthesis()) {
-      addCompileList(getTokenKey()); // (
+      addCompileXMLList(getTokenKey()); // (
       compileExpressionList();
-      addCompileList(getTokenKey()); // )
+      addCompileXMLList(getTokenKey()); // )
       continue;
     }
-    addCompileList(getTokenKey());
+    addCompileXMLList(getTokenKey());
     console.log(`${getTokenKey()}:${getTokenValue()}`);
   }
-  addCompileList("doStatement", "close");
+  addCompileXMLList("doStatement", "close");
   advance();
 };
 
 // while
 export const compileWhile = () => {
-  addCompileList("whileStatement", "open");
-  addCompileList(getTokenKey()); // while
+  addCompileXMLList("whileStatement", "open");
+  addCompileXMLList(getTokenKey()); // while
   advance();
-  addCompileList(getTokenKey()); // (
+  addCompileXMLList(getTokenKey()); // (
   advance();
   compileExpression(isEndParenthesis);
-  addCompileList(getTokenKey()); // )
+  addCompileXMLList(getTokenKey()); // )
   advance();
-  addCompileList(getTokenKey()); // {
+  addCompileXMLList(getTokenKey()); // {
   advance();
   compileStatements();
-  addCompileList(getTokenKey()); // }
+  addCompileXMLList(getTokenKey()); // }
   advance();
-  addCompileList("whileStatement", "close");
+  addCompileXMLList("whileStatement", "close");
 };
 
 // return
 export const compileReturn = () => {
-  addCompileList("returnStatement", "open");
-  addCompileList(getTokenKey()); // return
+  addCompileXMLList("returnStatement", "open");
+  addCompileXMLList(getTokenKey()); // return
   advance();
   if (isSemicolonSymbol()) {
-    addCompileList(getTokenKey()); // ;
+    addCompileXMLList(getTokenKey()); // ;
   } else {
     compileExpression(isSemicolonSymbol);
-    addCompileList(getTokenKey()); // ;
+    addCompileXMLList(getTokenKey()); // ;
   }
-  addCompileList("returnStatement", "close");
+  addCompileXMLList("returnStatement", "close");
   advance();
 };
 
 // expression
 export const compileExpression = (endCondition: () => boolean) => {
-  addCompileList("expression", "open");
+  addCompileXMLList("expression", "open");
   if (hasUnaryOp()) {
-    addCompileList("term", "open");
-    addCompileList(getTokenKey()); // unaryOp
+    addCompileXMLList("term", "open");
+    addCompileXMLList(getTokenKey()); // unaryOp
     advance();
     compileTerm();
-    addCompileList("term", "close");
+    addCompileXMLList("term", "close");
     advance();
   }
   while (!endCondition()) {
     if (isOp()) {
-      addCompileList(getTokenKey()); // op
+      addCompileXMLList(getTokenKey()); // op
       advance();
     }
     if (isCommaSymbol()) {
@@ -283,55 +283,55 @@ export const compileExpression = (endCondition: () => boolean) => {
     compileTerm();
     advance();
   }
-  addCompileList("expression", "close");
+  addCompileXMLList("expression", "close");
 };
 
 // expressionList
 export const compileExpressionList = () => {
-  addCompileList("expressionList", "open");
+  addCompileXMLList("expressionList", "open");
   advance();
   while (!isEndParenthesis()) {
     if (isCommaSymbol()) {
-      addCompileList(getTokenKey()); //,
+      addCompileXMLList(getTokenKey()); //,
       advance();
     }
     compileExpression(isEndParenthesis);
   }
-  addCompileList("expressionList", "close");
+  addCompileXMLList("expressionList", "close");
 };
 
 export const compileIdentifierOnTerm = () => {
   if (hasDotLookAhead()) {
     advance();
-    addCompileList(getTokenKey()); //.
+    addCompileXMLList(getTokenKey()); //.
     advance();
-    addCompileList(getTokenKey()); // new
+    addCompileXMLList(getTokenKey()); // new
     advance();
-    addCompileList(getTokenKey()); // (
+    addCompileXMLList(getTokenKey()); // (
     compileExpressionList();
-    addCompileList(getTokenKey()); // )
+    addCompileXMLList(getTokenKey()); // )
   }
   if (hasStartBracketAhead()) {
     advance();
-    addCompileList(getTokenKey()); // [
+    addCompileXMLList(getTokenKey()); // [
     advance();
     compileExpression(isEndBracket);
-    addCompileList(getTokenKey()); // ]
+    addCompileXMLList(getTokenKey()); // ]
   }
 };
 
 // term
 export const compileTerm = () => {
-  addCompileList("term", "open");
-  addCompileList(getTokenKey());
+  addCompileXMLList("term", "open");
+  addCompileXMLList(getTokenKey());
   if (hasIdentifierKey()) compileIdentifierOnTerm();
   if (isStartParenthesis()) {
     // (
     advance();
     compileExpression(isEndParenthesis);
-    addCompileList(getTokenKey()); // )
+    addCompileXMLList(getTokenKey()); // )
   }
-  addCompileList("term", "close");
+  addCompileXMLList("term", "close");
 };
 
 export const iterateComplation = () => {
@@ -346,6 +346,6 @@ export const Compilation = () => {
   while (!TokenManager.getIsNextTokenMapDone()) {
     iterateComplation();
   }
-  console.log(CompileManager.getCompileList());
-  return CompileManager.getCompileList().join("\n");
+  console.log(CompileManager.getCompileXMLList());
+  return CompileManager.getCompileXMLList().join("\n");
 };

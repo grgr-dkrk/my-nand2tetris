@@ -31,9 +31,9 @@ export const isStatement = () => {
 };
 export const isOp = () => /(\+|\-|\*|\/|\&|\||\<|\>|\=)/.test(getTokenValue());
 
-export const addCompileList = (tagName: string, tagPos: TagPos = "both") => {
+export const addCompileXMLList = (tagName: string, tagPos: TagPos = "both") => {
   const value = getTokenValue();
-  CompileManager.addCompileList(
+  CompileManager.addCompileXMLList(
     `${tagPos !== "close" ? `<${tagName}>` : ""}${
       tagPos === "both" ? value : ""
     }${tagPos !== "open" ? `</${tagName}>` : ""}`
