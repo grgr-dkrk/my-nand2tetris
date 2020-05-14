@@ -1,13 +1,13 @@
-export const XMLManager = (() => {
+export const CompileManager = (() => {
   let compileList: string[] = [];
   return {
-    addXMLList(str: string) {
+    addCompileList(str: string) {
       compileList.push(str)
     },
-    getXMLList() {
+    getCompileList() {
       return compileList
     },
-    resetXMLList() {
+    resetCompileList() {
       compileList = []
     }
   };

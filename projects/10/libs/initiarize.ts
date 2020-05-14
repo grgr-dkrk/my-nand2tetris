@@ -1,10 +1,10 @@
 import { TokenManager } from "../Tokenizer/TokenManager"
-import { XMLManager } from "../CompilationEngine/XMLManager"
+import { CompileManager } from "../CompilationEngine/CompileManager"
 
 export const Initiarize = (filePath: string) => {
   TokenManager.setTokenList([])
   TokenManager.resetTokenMap()
   TokenManager.resetIndex()
-  XMLManager.resetXMLList()
+  CompileManager.resetCompileList()
   console.log(`initiarized: ${filePath}`)
 }

@@ -23,7 +23,7 @@ const main = () => {
     /**
      * Tokenizer
      */
-    if (process.argv[3] && process.argv[3] !== "--skipTokenizedXML") {
+    if (process.argv[3] && process.argv[3] === "--torkenize") {
       console.log(`tokenized generating: ${filePath}`);
       const tokenizedXML = TokenizedXMLCreator(tokenizedString);
       fs.writeFileSync(
@@ -38,7 +38,7 @@ const main = () => {
     /**
      * Compiler
      */
-    if (process.argv[3] && process.argv[3] !== "--skipCompileXML") {
+    if (process.argv[3] && process.argv[3] === "--compile") {
       console.log(`compile generating: ${filePath}`);
       const compileXML = Compilation();
       fs.writeFileSync(

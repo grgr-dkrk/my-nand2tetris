@@ -1,5 +1,5 @@
 import { TokenManager } from "../Tokenizer/TokenManager";
-import { XMLManager } from "./XMLManager";
+import { CompileManager } from "./CompileManager";
 
 type TagPos = "both" | "open" | "close";
 
@@ -31,9 +31,9 @@ export const isStatement = () => {
 };
 export const isOp = () => /(\+|\-|\*|\/|\&|\||\<|\>|\=)/.test(getTokenValue());
 
-export const addXMLList = (tagName: string, tagPos: TagPos = "both") => {
+export const addCompileList = (tagName: string, tagPos: TagPos = "both") => {
   const value = getTokenValue();
-  XMLManager.addXMLList(
+  CompileManager.addCompileList(
     `${tagPos !== "close" ? `<${tagName}>` : ""}${
       tagPos === "both" ? value : ""
     }${tagPos !== "open" ? `</${tagName}>` : ""}`
