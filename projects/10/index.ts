@@ -1,11 +1,11 @@
-import { checkArgv, getFileDir } from "./util";
+import { checkArgv, getFileDir } from "./libs/file";
 import path from "path";
 import fs from "fs";
-import { Tokenizer } from "./tokenizer";
-import { Splitter } from "./splitter";
-import { XMLCreator } from "./xmlCreator";
-import { Compilation } from "./compilationEngine";
-import { Initiarize } from "./initiarize";
+import { Tokenizer } from "./Tokenizer";
+import { Splitter } from "./libs/textSplitter";
+import { TokenizedXMLCreator } from "./Tokenizer/xmlCreator";
+import { Compilation } from "./CompilationEngine";
+import { Initiarize } from "./libs/initiarize";
 
 const main = () => {
   checkArgv(process.argv);
@@ -20,25 +20,31 @@ const main = () => {
     const tokenizedString = Tokenizer(Splitter(file));
     console.log(tokenizedString);
 
-    if (process.argv[3] && process.argv[3] !== "--skipTokenizedXML") {
+    /**
+     * Tokenizer
+     */
+    if (process.argv[3] && process.argv[3] === "--torkenize") {
       console.log(`tokenized generating: ${filePath}`);
-      const tokenizedXML = XMLCreator(tokenizedString);
+      const tokenizedXML = TokenizedXMLCreator(tokenizedString);
       fs.writeFileSync(
         path.resolve(
           __dirname,
-          `TokenizeResults/${filePath.replace(".jack", "T.xml")}`
+          `ProgramResults/Tokenizer/${filePath.replace(".jack", "T.xml")}`
         ),
         tokenizedXML
       );
     }
 
-    if (process.argv[3] && process.argv[3] !== "--skipCompileXML") {
+    /**
+     * Compiler
+     */
+    if (process.argv[3] && process.argv[3] === "--compile") {
       console.log(`compile generating: ${filePath}`);
-      const compileXML = Compilation();
+      const compileXML = Compilation(filePath.replace(".jack", ""));
       fs.writeFileSync(
         path.resolve(
           __dirname,
-          `CompileResults/${filePath.replace(".jack", ".xml")}`
+          `ProgramResults/Compiler/${filePath.replace(".jack", ".xml")}`
         ),
         compileXML
       );

@@ -5,12 +5,12 @@
   "license": "MIT",
   "scripts": {
     "start": "ts-node ./",
-    "tokenized:Square": "ts-node ./ ./Square --skipCompileXML && sh ../../tools/TextComparer.sh ./TokenizeResults/MainT.xml ./Square/MainT.xml",
-    "tokenized:ArrayTest": "ts-node ./ ./ArrayTest --skipCompileXML && sh ../../tools/TextComparer.sh ./TokenizeResults/MainT.xml ./ArrayTest/MainT.xml",
+    "tokenized:Square": "ts-node ./ ./ProgramSamples/Square --torkenize && sh ../../tools/TextComparer.sh ./ProgramResults/Tokenizer/MainT.xml ./ProgramSamples/Square/MainT.xml",
+    "tokenized:ArrayTest": "ts-node ./ ./ProgramSamples/ArrayTest --torkenize && sh ../../tools/TextComparer.sh ./ProgramResults/Tokenizer/MainT.xml ./ProgramSamples/ArrayTest/MainT.xml",
     "tokenized:all": "yarn tokenized:Square && yarn tokenized:ArrayTest",
-    "compile:ExpressionLessSquare": "ts-node ./ ./ExpressionLessSquare --skipTokenizedXML && sh ../../tools/TextComparer.sh ./CompileResults/Main.xml ./ExpressionLessSquare/Main.xml && sh ../../tools/TextComparer.sh ./CompileResults/Square.xml ./ExpressionLessSquare/Square.xml && sh ../../tools/TextComparer.sh ./CompileResults/SquareGame.xml ./ExpressionLessSquare/SquareGame.xml",
-    "compile:Square": "ts-node ./ ./Square --skipTokenizedXML && sh ../../tools/TextComparer.sh ./CompileResults/Main.xml ./Square/Main.xml && sh ../../tools/TextComparer.sh ./CompileResults/Square.xml ./Square/Square.xml && sh ../../tools/TextComparer.sh ./CompileResults/SquareGame.xml ./Square/SquareGame.xml",
-    "compile:ArrayTest": "ts-node ./ ./ArrayTest --skipTokenizedXML && sh ../../tools/TextComparer.sh ./ArrayTest/Main.xml ./ArrayTest/Main.xml",
+    "compile:ExpressionLessSquare": "ts-node ./ ./ProgramSamples/ExpressionLessSquare --compile && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Main.xml ./ProgramSamples/ExpressionLessSquare/Main.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Square.xml ./ProgramSamples/ExpressionLessSquare/Square.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/SquareGame.xml ./ProgramSamples/ExpressionLessSquare/SquareGame.xml",
+    "compile:Square": "ts-node ./ ./ProgramSamples/Square --compile && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Main.xml ./ProgramSamples/Square/Main.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Square.xml ./ProgramSamples/Square/Square.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/SquareGame.xml ./ProgramSamples/Square/SquareGame.xml",
+    "compile:ArrayTest": "ts-node ./ ./ProgramSamples/ArrayTest --compile && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Main.xml ./ProgramSamples/ArrayTest/Main.xml",
     "compile:all": "yarn compile:ExpressionLessSquare && yarn compile:Square && yarn compile:ArrayTest",
     "test": "yarn tokenized:all && yarn compile:all"
   },

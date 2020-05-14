@@ -23,12 +23,3 @@ export const getFileDir = (path: string) => {
   console.log('getFileText: ok')
   return dir
 }
-
-export const convertIntToBinaryString = (str: string): string | void => {
-  const int = parseInt(str, 10)
-  if (!isFinite(int)) return
-  return int.toString(2).padStart(16, '0')
-}
-
-export const escapeJackString = (token: string) =>
-  token.replace(/&/, "&amp;").replace(/</, "&lt;").replace(/>/, "&gt;");

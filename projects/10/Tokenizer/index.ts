@@ -1,24 +1,12 @@
-import { SYMBOLS, KEYWORDS } from "./constants";
+import {
+  TYPE_KEYWORD,
+  TYPE_SYMBOL,
+  TYPE_STRING_CONST,
+  TYPE_INT_CONST,
+  TYPE_IDENTIFER,
+} from "../libs/constants";
 import { TokenManager } from "./TokenManager";
-
-export const TYPE_KEYWORD = "keyword" as const;
-export const TYPE_SYMBOL = "symbol" as const;
-export const TYPE_IDENTIFER = "identifier" as const;
-export const TYPE_INT_CONST = "integerConstant" as const;
-export const TYPE_STRING_CONST = "stringConstant" as const;
-
-const KEYWORD_CLASS = "class" as const;
-
-export const isKeyword = (token: string) => KEYWORDS.test(token);
-export const isSymbol = (token: string) => SYMBOLS.test(token);
-export const isInt = (token: string) => isFinite(parseInt(token, 10));
-export const isStr = (token: string) => token === '"';
-export const getTokenType = (token: string) => {
-  if (isKeyword(token)) return TYPE_KEYWORD;
-  if (isSymbol(token)) return TYPE_SYMBOL;
-};
-export const isClass = (token: string) => token === KEYWORD_CLASS;
-export const parseClass = () => {};
+import { isKeyword, isStr, isInt, isSymbol } from "./utils";
 
 export const setKeyWord = () => {
   TokenManager.setTokenMap(
@@ -79,5 +67,5 @@ export const Tokenizer = (tokens: string[]) => {
     if (TokenManager.getIndex() <= tokens.length - 1) advance();
   };
   if (TokenManager.getIndex() <= tokens.length - 1) advance();
-  return TokenManager.getTokenMap()
+  return TokenManager.getTokenMap();
 };
