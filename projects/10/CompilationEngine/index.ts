@@ -104,12 +104,32 @@ export const compileClassVarDec = () => {
 
 // varDec
 export const compileVarDec = () => {
+  let type: Type
+  let name: Name
   addCompileXMLList("varDec", "open");
+
+  // keyword
   addCompileXMLList(getTokenKey()); // var
+
+  // type
+  advance();
+  type = getTokenValue()
+  addCompileXMLList(getTokenKey());
+  advance();
+
   while (!isSemicolonSymbol()) {
-    advance();
+    if (isCommaSymbol()) {
+      addCompileXMLList(getTokenKey());
+      advance()
+      continue;
+    }
+    // identifier
+    name = getTokenValue()
     addCompileXMLList(getTokenKey());
+    SymbolTable.define(name, type, SymbolKind.Var)
+    advance()
   }
+  addCompileXMLList(getTokenKey());
   addCompileXMLList("varDec", "close");
 };
 
@@ -131,14 +151,22 @@ export const compileSubroutineBody = () => {
 
 // parameterList
 export const compileParameterList = () => {
+  let type: Type
+  let name: Name
+
   // compileParameterList の終端記号はタグの外に置く
   addCompileXMLList(getTokenKey()); // (
   addCompileXMLList("parameterList", "open");
   advance();
+
   while (!isEndParenthesis()) {
+    type = getTokenValue()
     addCompileXMLList(getTokenKey());
     advance();
+    name = getTokenValue()
+    SymbolTable.define(name, type, SymbolKind.Argument)
   }
+
   addCompileXMLList("parameterList", "close");
   addCompileXMLList(getTokenKey()); // )
 };
@@ -196,6 +224,9 @@ export const compileStatements = () => {
 
 // let
 export const compileLet = () => {
+  let kind: SymbolKind
+  let type: Type
+  let name: Name
   addCompileXMLList("letStatement", "open");
   addCompileXMLList(getTokenKey()); // let
   while (!isSemicolonSymbol()) {
@@ -386,5 +417,6 @@ export const Compilation = () => {
   }
   console.log(CompileManager.getCompileList());
   console.log(SymbolTable.getClassScope());
+  console.log(SymbolTable.getSubroutineScope()); // TODO
   return CompileManager.getCompileXMLList().join("\n");
 };
