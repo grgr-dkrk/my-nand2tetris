@@ -23,6 +23,7 @@ import {
   hasStartBracketAhead,
   hasIdentifierKey,
 } from "./utils";
+import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
 
 export const compileClass = () => {
   addCompileXMLList("class", "open");
@@ -55,11 +56,48 @@ export const compileClass = () => {
 
 // classVarDec
 export const compileClassVarDec = () => {
+  let kind: SymbolKind
+  let type: Type
+  let name: Name
   addCompileXMLList("classVarDec", "open");
+
+  // kind
   addCompileXMLList(getTokenKey()); // static | field
-  while (!isSemicolonSymbol()) {
-    advance();
+  kind = getTokenValue() as SymbolKind // static | field
+  advance();
+
+  // type
+  addCompileXMLList(getTokenKey());
+  type = getTokenValue();
+  advance();
+
+  // name
+  addCompileXMLList(getTokenKey());
+  name = getTokenValue();
+  advance();
+
+  // define varDec
+  SymbolTable.define(name, type, kind)
+
+  while (true) {
+    if (isSemicolonSymbol()) {
+      addCompileXMLList(getTokenKey()); // ;
+      break;
+    }
+
+    // comma
+    addCompileXMLList(getTokenKey()); // ,
+    advance()
+
+    // add name
     addCompileXMLList(getTokenKey());
+    name = getTokenValue();
+
+    if (name === ';' || name === ',') throw new Error(`invalid name ${name}`)
+
+    // define varDec additional
+    SymbolTable.define(name, type, kind)
+    advance()
   }
   addCompileXMLList("classVarDec", "close");
 };
@@ -346,6 +384,7 @@ export const Compilation = () => {
   while (!TokenManager.getIsNextTokenMapDone()) {
     iterateComplation();
   }
-  console.log(CompileManager.getCompileXMLList());
+  console.log(CompileManager.getCompileList());
+  console.log(SymbolTable.getClassScope());
   return CompileManager.getCompileXMLList().join("\n");
 };

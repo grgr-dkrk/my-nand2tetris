@@ -12,8 +12,7 @@
     "compile:Square": "ts-node ./ ./ProgramSamples/Square --compile && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Main.xml ./ProgramSamples/Square/Main.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Square.xml ./ProgramSamples/Square/Square.xml && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/SquareGame.xml ./ProgramSamples/Square/SquareGame.xml",
     "compile:ArrayTest": "ts-node ./ ./ProgramSamples/ArrayTest --compile && sh ../../tools/TextComparer.sh ./ProgramResults/Compiler/Main.xml ./ProgramSamples/ArrayTest/Main.xml",
     "compile:all": "yarn compile:ExpressionLessSquare && yarn compile:Square && yarn compile:ArrayTest",
-    "test": "yarn tokenized:all && yarn compile:all",
-    "vm:ExpressionLessSquare": "ts-node ./ ./ProgramSamples/ExpressionLessSquare --compile"
+    "test": "yarn tokenized:all && yarn compile:all"
   },
   "devDependencies": {
     "@types/node": "^13.13.5",

@@ -1,21 +1,21 @@
-enum SymbolKind {
+export enum SymbolKind {
   Static = "static",
   Field = "field",
   Argument = "argument",
   Var = "var",
 }
 
-type Name = string;
-type Type = string;
+export type Name = string;
+export type Type = string;
 
-type Table<T> = {
+export type Table<T> = {
   type: string;
   kind: T;
   index: number;
 };
 
 export const SymbolTable = (() => {
-  const count: Record<SymbolKind, number> = {
+  let count: Record<SymbolKind, number> = {
     [SymbolKind.Static]: 0,
     [SymbolKind.Field]: 0,
     [SymbolKind.Argument]: 0,
@@ -34,6 +34,7 @@ export const SymbolTable = (() => {
       subroutineScope = {};
     },
     define(name: Name, type: Type, kind: SymbolKind) {
+      console.log(`define: ${name}, ${type}, ${kind}`);
       switch (kind) {
         case SymbolKind.Static:
           classScope[name] = { type, kind, index: count.static };
@@ -80,6 +81,22 @@ export const SymbolTable = (() => {
       if (classScope[name]) return classScope[name].index;
       if (subroutineScope[name]) return subroutineScope[name].index;
       return null;
+    },
+    getClassScope() {
+      return classScope;
+    },
+    getSubroutineScope() {
+      return subroutineScope;
+    },
+    reset() {
+      classScope = {};
+      subroutineScope = {};
+      count = {
+        [SymbolKind.Static]: 0,
+        [SymbolKind.Field]: 0,
+        [SymbolKind.Argument]: 0,
+        [SymbolKind.Var]: 0,
+      };
     },
   };
 })();
