@@ -1,5 +1,5 @@
-import { TokenManager } from "./TokenManager"
-import { XMLManager } from "./XMLManager"
+import { TokenManager } from "../Tokenizer/TokenManager"
+import { XMLManager } from "../CompilationEngine/XMLManager"
 
 export const Initiarize = (filePath: string) => {
   TokenManager.setTokenList([])

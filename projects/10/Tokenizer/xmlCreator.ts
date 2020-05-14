@@ -1,4 +1,4 @@
-export const XMLCreator = (tokenList: Map<string, string>) => {
+export const TokenizedXMLCreator = (tokenList: Map<string, string>) => {
   const lines: string[] = []
   lines.push(`<tokens>`)
   tokenList.forEach((value, key) => {

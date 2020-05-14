@@ -5,7 +5,7 @@ export const formatLine = (line: string) =>
 export const splitWords = (line: string) => line.split(" ");
 
 export const splitSymbols = (token: string) => {
-  return token.split(SYMBOLS).filter(t => t)
+  return token.split(SYMBOLS).filter((t) => t);
 };
 
 export const Splitter = (body: string) => {
@@ -18,5 +18,5 @@ export const Splitter = (body: string) => {
       tokens.push(splitWords(line));
   });
   const flattenTokens = ([] as string[]).concat(...tokens);
-  return ([] as string[]).concat(...flattenTokens.map(splitSymbols))
+  return ([] as string[]).concat(...flattenTokens.map(splitSymbols));
 };

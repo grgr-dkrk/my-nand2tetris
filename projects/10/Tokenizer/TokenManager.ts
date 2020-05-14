@@ -1,4 +1,4 @@
-import { escapeJackString } from "./util";
+import { escapeJackString } from "./utils";
 
 export const TokenManager = (() => {
   let index = 0;
