@@ -287,18 +287,17 @@ export const compileLet = () => {
       VMWriter.writeArithmetic(Command.Add);
       VMWriter.writePop(Segment.Temp, 0);
 
-      advance()
+      advance();
       addCompileXMLList(getTokenKey()); // =
-      advance()
+      advance();
       compileExpression(isSemicolonSymbol);
       addCompileXMLList(getTokenKey()); // ;
 
-      VMWriter.writePush(Segment.Temp, 0)
-      VMWriter.writePop(Segment.Pointer, 1)
-      VMWriter.writePop(Segment.That, 0)
+      VMWriter.writePush(Segment.Temp, 0);
+      VMWriter.writePop(Segment.Pointer, 1);
+      VMWriter.writePop(Segment.That, 0);
       continue;
-    }
-    else {
+    } else {
       addCompileXMLList(getTokenKey()); // =
       advance();
       compileExpression(isSemicolonSymbol);
@@ -307,7 +306,7 @@ export const compileLet = () => {
       // vm
       if (kind == null) throw new Error(`kind is not found`);
       if (index == null) throw new Error(`index is not found`);
-      VMWriter.writePop((kind as unknown) as Segment, index)
+      VMWriter.writePop((kind as unknown) as Segment, index);
 
       continue;
     }
@@ -365,12 +364,12 @@ export const compileDo = () => {
 // while
 export const compileWhile = () => {
   addCompileXMLList("whileStatement", "open");
-  const whileIndex = VMWriter.getWhileIndex()
+  const whileIndex = VMWriter.getWhileIndex();
   addCompileXMLList(getTokenKey()); // while
   advance();
 
   //vm
-  VMWriter.writeLabel(`WHILE${whileIndex}`)
+  VMWriter.writeLabel(`WHILE${whileIndex}`);
 
   // conition
   addCompileXMLList(getTokenKey()); // (
@@ -382,11 +381,11 @@ export const compileWhile = () => {
 
   // statements
   addCompileXMLList(getTokenKey()); // {
-  VMWriter.writeIf(`WHILE_END${whileIndex}`)
+  VMWriter.writeIf(`WHILE_END${whileIndex}`);
   advance();
   compileStatements();
   VMWriter.writeGoto(`WHILE${whileIndex}`);
-  VMWriter.writeLabel(`WHILE_END${whileIndex}`)
+  VMWriter.writeLabel(`WHILE_END${whileIndex}`);
   addCompileXMLList(getTokenKey()); // }
   advance();
 
@@ -401,10 +400,12 @@ export const compileReturn = () => {
   advance();
   if (isSemicolonSymbol()) {
     addCompileXMLList(getTokenKey()); // ;
+    VMWriter.writePush(Segment.Const, 0);
   } else {
     compileExpression(isSemicolonSymbol);
     addCompileXMLList(getTokenKey()); // ;
   }
+  VMWriter.writeReturn();
   addCompileXMLList("returnStatement", "close");
   advance();
 };
