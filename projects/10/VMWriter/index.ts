@@ -21,8 +21,15 @@ export enum Command {
   Not = "not",
 }
 
+type Indexes = {
+  while: number,
+}
+
 export const VMWriter = (() => {
   let list: string[] = [];
+  const indexes: Indexes = {
+    while: 0,
+  }
   return {
     writePush(segment: Segment, index: number) {
       list.push(`push ${segment} ${index}`);
@@ -50,6 +57,12 @@ export const VMWriter = (() => {
     },
     writeReturn() {
       list.push(`return`)
+    },
+    addWhileIndex() {
+      indexes.while++
+    },
+    getWhileIndex() {
+      return indexes.while
     },
     getList() {
       return list

@@ -365,18 +365,32 @@ export const compileDo = () => {
 // while
 export const compileWhile = () => {
   addCompileXMLList("whileStatement", "open");
+  const whileIndex = VMWriter.getWhileIndex()
   addCompileXMLList(getTokenKey()); // while
   advance();
+
+  //vm
+  VMWriter.writeLabel(`WHILE${whileIndex}`)
+
+  // conition
   addCompileXMLList(getTokenKey()); // (
   advance();
   compileExpression(isEndParenthesis);
+  VMWriter.writeArithmetic(Command.Not);
   addCompileXMLList(getTokenKey()); // )
   advance();
+
+  // statements
   addCompileXMLList(getTokenKey()); // {
+  VMWriter.writeIf(`WHILE_END${whileIndex}`)
   advance();
   compileStatements();
+  VMWriter.writeGoto(`WHILE${whileIndex}`);
+  VMWriter.writeLabel(`WHILE_END${whileIndex}`)
   addCompileXMLList(getTokenKey()); // }
   advance();
+
+  VMWriter.addWhileIndex();
   addCompileXMLList("whileStatement", "close");
 };
 
