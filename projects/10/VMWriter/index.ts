@@ -22,19 +22,21 @@ export enum Command {
 }
 
 export const OS_MATH = {
-  MULTIPLY: 'Math.multiply',
-  DIVIDE: 'Math.divide',
-} as const
+  MULTIPLY: "Math.multiply",
+  DIVIDE: "Math.divide",
+} as const;
 
 type Indexes = {
-  while: number,
-}
+  while: number;
+  if: number;
+};
 
 export const VMWriter = (() => {
   let list: string[] = [];
   const indexes: Indexes = {
     while: 0,
-  }
+    if: 0,
+  };
   return {
     writePush(segment: Segment, index: number) {
       list.push(`push ${segment} ${index}`);
@@ -61,19 +63,25 @@ export const VMWriter = (() => {
       list.push(`call ${name} ${nLocals}`);
     },
     writeReturn() {
-      list.push(`return`)
+      list.push(`return`);
     },
     addWhileIndex() {
-      indexes.while++
+      indexes.while++;
     },
     getWhileIndex() {
-      return indexes.while
+      return indexes.while;
+    },
+    addIfIndex() {
+      indexes.if++;
+    },
+    getIfIndex() {
+      return indexes.if;
     },
     getList() {
-      return list
+      return list;
     },
     reset() {
-      list = []
-    }
+      list = [];
+    },
   };
 })();

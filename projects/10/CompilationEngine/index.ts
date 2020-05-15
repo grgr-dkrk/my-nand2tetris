@@ -317,6 +317,7 @@ export const compileLet = () => {
 
 // if
 export const compileIf = () => {
+  const ifIndex = VMWriter.getIfIndex();
   addCompileXMLList("ifStatement", "open");
   addCompileXMLList(getTokenKey()); // if
   advance();
@@ -327,8 +328,13 @@ export const compileIf = () => {
   advance();
   addCompileXMLList(getTokenKey()); // {
   advance();
+  VMWriter.writeIf(`IF_TRUE${ifIndex}`);
+  VMWriter.writeGoto(`IF_FALSE${ifIndex}`);
+  VMWriter.writeLabel(`IF_TRUE${ifIndex}`);
   compileStatements();
+  VMWriter.writeGoto(`IF_END${ifIndex}`);
   addCompileXMLList(getTokenKey()); // }
+  VMWriter.writeLabel(`IF_FALSE${ifIndex}`);
   advance();
   if (getTokenValue() === "else") {
     addCompileXMLList(getTokenKey()); // else
@@ -339,6 +345,8 @@ export const compileIf = () => {
     addCompileXMLList(getTokenKey()); // }
     advance();
   }
+  VMWriter.writeLabel(`IF_END${ifIndex}`);
+  VMWriter.addIfIndex();
   addCompileXMLList("ifStatement", "close");
 };
 
@@ -425,12 +433,12 @@ export const compileExpression = (endCondition: () => boolean) => {
   while (!endCondition()) {
     if (isOp()) {
       addCompileXMLList(getTokenKey()); // op
-      if (getTokenValue() === '*') {
-        VMWriter.writeCall(OS_MATH.MULTIPLY, 2)
-      } else if (getTokenValue() === '/') {
-        VMWriter.writeCall(OS_MATH.DIVIDE, 2)
+      if (getTokenValue() === "*") {
+        VMWriter.writeCall(OS_MATH.MULTIPLY, 2);
+      } else if (getTokenValue() === "/") {
+        VMWriter.writeCall(OS_MATH.DIVIDE, 2);
       } else {
-        VMWriter.writeArithmetic(convertOpToCommand())
+        VMWriter.writeArithmetic(convertOpToCommand());
       }
       advance();
     }
