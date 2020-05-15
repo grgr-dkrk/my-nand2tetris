@@ -25,7 +25,7 @@ import {
   isMethod,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
-import { VMWriter, Segment } from "../VMWriter";
+import { VMWriter, Segment, Command } from "../VMWriter";
 
 export const compileClass = () => {
   addCompileXMLList("class", "open");
@@ -58,13 +58,13 @@ export const compileClass = () => {
 
 // classVarDec
 export const compileClassVarDec = () => {
-  let kind: SymbolKind
-  let type: Type
-  let name: Name
+  let kind: SymbolKind;
+  let type: Type;
+  let name: Name;
   addCompileXMLList("classVarDec", "open");
 
   // kind
-  kind = getTokenValue() as SymbolKind // static | field
+  kind = getTokenValue() as SymbolKind; // static | field
   addCompileXMLList(getTokenKey()); // static | field
   advance();
 
@@ -79,7 +79,7 @@ export const compileClassVarDec = () => {
   advance();
 
   // define varDec
-  SymbolTable.define(name, type, kind)
+  SymbolTable.define(name, type, kind);
 
   while (true) {
     if (isSemicolonSymbol()) {
@@ -89,25 +89,25 @@ export const compileClassVarDec = () => {
 
     // comma
     addCompileXMLList(getTokenKey()); // ,
-    advance()
+    advance();
 
     // add name
     name = getTokenValue();
     addCompileXMLList(getTokenKey());
 
-    if (name === ';' || name === ',') throw new Error(`invalid name ${name}`)
+    if (name === ";" || name === ",") throw new Error(`invalid name ${name}`);
 
     // define varDec additional
-    SymbolTable.define(name, type, kind)
-    advance()
+    SymbolTable.define(name, type, kind);
+    advance();
   }
   addCompileXMLList("classVarDec", "close");
 };
 
 // varDec
 export const compileVarDec = () => {
-  let type: Type
-  let name: Name
+  let type: Type;
+  let name: Name;
   addCompileXMLList("varDec", "open");
 
   // keyword
@@ -115,24 +115,23 @@ export const compileVarDec = () => {
   advance();
 
   // type
-  type = getTokenValue()
+  type = getTokenValue();
   addCompileXMLList(getTokenKey()); // type
   advance();
 
   while (!isSemicolonSymbol()) {
-
     // , 区切りはSymbolTableに不要なので、XMLにだけ追加
     if (isCommaSymbol()) {
       addCompileXMLList(getTokenKey()); // ,
-      advance()
+      advance();
       continue;
     }
 
     // identifier
-    name = getTokenValue()
-    SymbolTable.define(name, type, SymbolKind.Var)
+    name = getTokenValue();
+    SymbolTable.define(name, type, SymbolKind.Var);
     addCompileXMLList(getTokenKey()); // identifier
-    advance()
+    advance();
   }
 
   addCompileXMLList(getTokenKey()); // ;
@@ -157,8 +156,8 @@ export const compileSubroutineBody = () => {
 
 // parameterList
 export const compileParameterList = () => {
-  let type: Type
-  let name: Name
+  let type: Type;
+  let name: Name;
 
   // compileParameterList の終端記号はタグの外に置く
   addCompileXMLList(getTokenKey()); // (
@@ -171,23 +170,23 @@ export const compileParameterList = () => {
     }
     if (isCommaSymbol()) {
       addCompileXMLList(getTokenKey()); // ,
-      advance()
+      advance();
       continue;
     }
 
     // type
-    type = getTokenValue()
+    type = getTokenValue();
     addCompileXMLList(getTokenKey()); // type
     advance();
 
     // name
-    name = getTokenValue()
-    if(name === ',' || name === ')') {
-      throw new Error(`invalid name: ${name}`)
+    name = getTokenValue();
+    if (name === "," || name === ")") {
+      throw new Error(`invalid name: ${name}`);
     }
-    SymbolTable.define(name, type, SymbolKind.Argument)
+    SymbolTable.define(name, type, SymbolKind.Argument);
     addCompileXMLList(getTokenKey()); // name
-    advance()
+    advance();
   }
   addCompileXMLList("parameterList", "close");
   addCompileXMLList(getTokenKey()); // )
@@ -199,12 +198,16 @@ export const compileSubroutine = () => {
   addCompileXMLList("keyword");
 
   // kind
-  advance()
+  advance();
   addCompileXMLList(getTokenKey()); // constructor | function | method
 
   // define Method
   if (isMethod()) {
-    SymbolTable.define('self', TokenManager.getClassName(), SymbolKind.Argument)
+    SymbolTable.define(
+      "self",
+      TokenManager.getClassName(),
+      SymbolKind.Argument
+    );
   }
 
   while (true) {
@@ -256,17 +259,17 @@ export const compileStatements = () => {
 
 // let
 export const compileLet = () => {
-  let kind: SymbolKind | null
-  let name: Name
-  let index: number | null
+  let kind: SymbolKind | null;
+  let name: Name;
+  let index: number | null;
   addCompileXMLList("letStatement", "open");
   addCompileXMLList(getTokenKey()); // let
 
   // name, kind, inedx
   advance();
-  name = getTokenValue()
-  kind = SymbolTable.kindOf(name)
-  index = SymbolTable.indexOf(name)
+  name = getTokenValue();
+  kind = SymbolTable.kindOf(name);
+  index = SymbolTable.indexOf(name);
   addCompileXMLList(getTokenKey());
 
   while (!isSemicolonSymbol()) {
@@ -276,16 +279,38 @@ export const compileLet = () => {
       advance();
       compileExpression(isEndBracket);
       addCompileXMLList(getTokenKey()); // ]
+
+      // vm
+      if (kind == null) throw new Error(`kind is not found`);
+      if (index == null) throw new Error(`index is not found`);
+      VMWriter.writePush((kind as unknown) as Segment, index);
+      VMWriter.writeArithmetic(Command.Add);
+      VMWriter.writePop(Segment.Temp, 0);
+
+      advance()
+      addCompileXMLList(getTokenKey()); // =
+      advance()
+      compileExpression(isSemicolonSymbol);
+      addCompileXMLList(getTokenKey()); // ;
+
+      VMWriter.writePush(Segment.Temp, 0)
+      VMWriter.writePop(Segment.Pointer, 1)
+      VMWriter.writePop(Segment.That, 0)
       continue;
     }
-    if (isEqualSymbol()) {
+    else {
       addCompileXMLList(getTokenKey()); // =
       advance();
       compileExpression(isSemicolonSymbol);
       addCompileXMLList(getTokenKey()); // ;
+
+      // vm
+      if (kind == null) throw new Error(`kind is not found`);
+      if (index == null) throw new Error(`index is not found`);
+      VMWriter.writePop((kind as unknown) as Segment, index)
+
       continue;
     }
-    addCompileXMLList(getTokenKey());
   }
   addCompileXMLList("letStatement", "close");
 };
@@ -333,7 +358,7 @@ export const compileDo = () => {
     addCompileXMLList(getTokenKey());
   }
   addCompileXMLList("doStatement", "close");
-  VMWriter.writePop(Segment.Temp, 0)
+  VMWriter.writePop(Segment.Temp, 0);
   advance();
 };
 
