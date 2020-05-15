@@ -79,13 +79,13 @@ export const convertOpToCommand = (): Command => {
       return Command.Add;
     case "-":
       return Command.Sub;
-    case "&":
+    case "&amp;":
       return Command.And;
     case "|":
       return Command.Or;
-    case "<":
+    case "&lt;":
       return Command.Lt;
-    case ">":
+    case "&gt;":
       return Command.Gt;
     case "=":
       return Command.Eq;

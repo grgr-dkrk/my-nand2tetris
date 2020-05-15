@@ -425,9 +425,9 @@ export const compileExpression = (endCondition: () => boolean) => {
   while (!endCondition()) {
     if (isOp()) {
       addCompileXMLList(getTokenKey()); // op
-      if (getTokenKey() === '*') {
+      if (getTokenValue() === '*') {
         VMWriter.writeCall(OS_MATH.MULTIPLY, 2)
-      } else if (getTokenKey() === '/') {
+      } else if (getTokenValue() === '/') {
         VMWriter.writeCall(OS_MATH.DIVIDE, 2)
       } else {
         VMWriter.writeArithmetic(convertOpToCommand())
