@@ -26,6 +26,10 @@ export const OS_MATH = {
   DIVIDE: "Math.divide",
 } as const;
 
+export const OS_MEMORY = {
+  ALLOC: "Math.multiply",
+} as const;
+
 type Indexes = {
   while: number;
   if: number;

@@ -26,7 +26,7 @@ import {
   convertOpToCommand,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
-import { VMWriter, Segment, Command, OS_MATH } from "../VMWriter";
+import { VMWriter, Segment, Command, OS_MATH, OS_MEMORY } from "../VMWriter";
 
 export const compileClass = () => {
   addCompileXMLList("class", "open");
@@ -140,17 +140,35 @@ export const compileVarDec = () => {
 };
 
 // subroutineBody
-export const compileSubroutineBody = () => {
+export const compileSubroutineBody = (kind: string, name: Name) => {
   addCompileXMLList("subroutineBody", "open");
   addCompileXMLList(getTokenKey()); // {
-  while (!isEndBrace()) {
+  let functionName: string;
+  let local: number;
+
+  advance();
+
+  while (isVarDec()) {
+    compileVarDec();
     advance();
-    if (isVarDec()) {
-      compileVarDec();
-      continue;
-    }
-    compileStatements();
+    continue;
   }
+
+  functionName = `${TokenManager.getClassName()}.${name}`;
+  VMWriter.writeFunction(functionName, SymbolTable.varCount(SymbolKind.Var));
+
+  if (kind === "constructor") {
+    VMWriter.writePush(Segment.Const, SymbolTable.varCount(SymbolKind.Field));
+    VMWriter.writeCall(OS_MEMORY.ALLOC, 1);
+    VMWriter.writePop(Segment.Pointer, 0);
+  }
+  if (kind === "method") {
+    VMWriter.writePush(Segment.Arg, 0);
+    VMWriter.writePop(Segment.Pointer, 0);
+  }
+
+  compileStatements(); // let
+
   addCompileXMLList(getTokenKey()); // }
   addCompileXMLList("subroutineBody", "close");
 };
@@ -197,10 +215,9 @@ export const compileParameterList = () => {
 export const compileSubroutine = () => {
   addCompileXMLList("subroutineDec", "open");
   addCompileXMLList("keyword");
-
-  // kind
-  advance();
-  addCompileXMLList(getTokenKey()); // constructor | function | method
+  let kind: string;
+  let name: Name;
+  SymbolTable.startSubroutine();
 
   // define Method
   if (isMethod()) {
@@ -211,6 +228,21 @@ export const compileSubroutine = () => {
     );
   }
 
+  // set Kind
+  kind = getTokenValue();
+  if (kind !== "constructor" && kind !== "function" && kind !== "method") {
+    throw new Error(`invalid subroutine kind: ${kind}`);
+  }
+
+  // set type
+  advance();
+  addCompileXMLList(getTokenKey()); // void | type
+
+  // set Name
+  advance();
+  name = getTokenValue();
+  addCompileXMLList(getTokenKey()); // subroutineName
+
   while (true) {
     advance();
     // parameterList
@@ -220,7 +252,7 @@ export const compileSubroutine = () => {
     }
     // subroutineBody
     if (isStartBrace()) {
-      compileSubroutineBody();
+      compileSubroutineBody(kind, name);
       break;
     }
     addCompileXMLList(getTokenKey());
@@ -513,7 +545,6 @@ export const Compilation = (className: string) => {
     iterateComplation();
   }
   console.log(CompileManager.getCompileList());
-  console.log(SymbolTable.getClassScope());
-  console.log(SymbolTable.getSubroutineScope()); // TODO
+  console.log(VMWriter.getList());
   return CompileManager.getCompileXMLList().join("\n");
 };
