@@ -25,6 +25,7 @@ import {
   isMethod,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
+import { VMWriter, Segment } from "../VMWriter";
 
 export const compileClass = () => {
   addCompileXMLList("class", "open");
@@ -200,6 +201,8 @@ export const compileSubroutine = () => {
   // kind
   advance()
   addCompileXMLList(getTokenKey()); // constructor | function | method
+
+  // define Method
   if (isMethod()) {
     SymbolTable.define('self', TokenManager.getClassName(), SymbolKind.Argument)
   }
@@ -328,9 +331,9 @@ export const compileDo = () => {
       continue;
     }
     addCompileXMLList(getTokenKey());
-    console.log(`${getTokenKey()}:${getTokenValue()}`);
   }
   addCompileXMLList("doStatement", "close");
+  VMWriter.writePop(Segment.Temp, 0)
   advance();
 };
 
