@@ -1,5 +1,6 @@
 import { TokenManager } from "../Tokenizer/TokenManager";
 import { CompileManager } from "./CompileManager";
+import { Command } from "../VMWriter";
 
 type TagPos = "both" | "open" | "close";
 
@@ -50,7 +51,7 @@ export const isEqualSymbol = () => getTokenValue() === "=";
 export const isSemicolonSymbol = () => getTokenValue() === ";";
 export const isCommaSymbol = () => getTokenValue() === ",";
 export const isPipeSymbol = () => getTokenValue() === "|";
-export const isMethod = () => getTokenValue() === "method"
+export const isMethod = () => getTokenValue() === "method";
 
 export const hasDotLookAhead = () => {
   const lookAhead = lookahead();
@@ -71,3 +72,24 @@ export const hasUnaryOp = () => {
 
 export const hasSymbolKey = () => getTokenKey() === "symbol";
 export const hasIdentifierKey = () => getTokenKey() === "identifier";
+
+export const convertOpToCommand = (): Command => {
+  switch (getTokenValue()) {
+    case "+":
+      return Command.Add;
+    case "-":
+      return Command.Sub;
+    case "&":
+      return Command.And;
+    case "|":
+      return Command.Or;
+    case "<":
+      return Command.Lt;
+    case ">":
+      return Command.Gt;
+    case "=":
+      return Command.Eq;
+    default:
+      throw new Error(`invalid op: ${getTokenValue()}`)
+  }
+};

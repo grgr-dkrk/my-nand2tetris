@@ -23,9 +23,10 @@ import {
   hasStartBracketAhead,
   hasIdentifierKey,
   isMethod,
+  convertOpToCommand,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
-import { VMWriter, Segment, Command } from "../VMWriter";
+import { VMWriter, Segment, Command, OS_MATH } from "../VMWriter";
 
 export const compileClass = () => {
   addCompileXMLList("class", "open");
@@ -424,6 +425,13 @@ export const compileExpression = (endCondition: () => boolean) => {
   while (!endCondition()) {
     if (isOp()) {
       addCompileXMLList(getTokenKey()); // op
+      if (getTokenKey() === '*') {
+        VMWriter.writeCall(OS_MATH.MULTIPLY, 2)
+      } else if (getTokenKey() === '/') {
+        VMWriter.writeCall(OS_MATH.DIVIDE, 2)
+      } else {
+        VMWriter.writeArithmetic(convertOpToCommand())
+      }
       advance();
     }
     if (isCommaSymbol()) {

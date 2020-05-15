@@ -21,6 +21,11 @@ export enum Command {
   Not = "not",
 }
 
+export const OS_MATH = {
+  MULTIPLY: 'Math.multiply',
+  DIVIDE: 'Math.divide',
+} as const
+
 type Indexes = {
   while: number,
 }
