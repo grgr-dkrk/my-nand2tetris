@@ -164,14 +164,30 @@ export const compileParameterList = () => {
   addCompileXMLList("parameterList", "open");
   advance();
 
-  while (!isEndParenthesis()) {
-    type = getTokenValue()
-    addCompileXMLList(getTokenKey());
-    advance();
-    name = getTokenValue()
-    SymbolTable.define(name, type, SymbolKind.Argument)
-  }
+  while (true) {
+    if (isEndParenthesis()) {
+      break;
+    }
+    if (isCommaSymbol()) {
+      addCompileXMLList(getTokenKey()); // ,
+      advance()
+      continue;
+    }
 
+    // type
+    type = getTokenValue()
+    addCompileXMLList(getTokenKey()); // type
+    advance();
+
+    // name
+    name = getTokenValue()
+    if(name === ',' || name === ')') {
+      throw new Error(`invalid name: ${name}`)
+    }
+    SymbolTable.define(name, type, SymbolKind.Argument)
+    addCompileXMLList(getTokenKey()); // name
+    advance()
+  }
   addCompileXMLList("parameterList", "close");
   addCompileXMLList(getTokenKey()); // )
 };
