@@ -368,7 +368,7 @@ export const compileLet = () => {
   name = getTokenValue();
   kind = SymbolTable.kindOf(name);
   index = SymbolTable.indexOf(name);
-  addCompileXMLList(getTokenKey());
+  addCompileXMLList(getTokenKey()); // varName
 
   while (!isSemicolonSymbol()) {
     advance();
@@ -381,7 +381,7 @@ export const compileLet = () => {
       // vm
       if (kind == null) throw new Error(`kind is not found`);
       if (index == null) throw new Error(`index is not found`);
-      VMWriter.writePush((kind as unknown) as Segment, index);
+      VMWriter.writePush(convertedKindToSegment(kind), index);
       VMWriter.writeArithmetic(Command.Add);
       VMWriter.writePop(Segment.Temp, 0);
 
@@ -559,19 +559,42 @@ export const compileExpressionList = () => {
   addCompileXMLList("expressionList", "close");
 };
 
+export const compileArray = () => {
+  addCompileXMLList(getTokenKey()); // var name
+  const varName = getTokenValue();
+  advance();
+
+  addCompileXMLList(getTokenKey()); // [
+  advance();
+  compileExpression(isEndBracket);
+
+  addCompileXMLList(getTokenKey()); // ]
+
+  // vm
+  const kind = SymbolTable.kindOf(varName);
+  const index = SymbolTable.indexOf(varName);
+  if (kind == null) throw new Error(`kind is not found`);
+  if (index == null) throw new Error(`index is not found`);
+  VMWriter.writePush(convertedKindToSegment(kind), index);
+  VMWriter.writeArithmetic(Command.Add);
+  VMWriter.writePop(Segment.Pointer, 1);
+  VMWriter.writePush(Segment.That, 0);
+};
+
 export const compileIdentifierOnTerm = () => {
   // Var Name
   if (hasDotLookAhead()) {
     compileSubroutineCall();
   } else if (hasStartBracketAhead()) {
-    addCompileXMLList(getTokenKey());
-    advance();
-    addCompileXMLList(getTokenKey()); // [
-    advance();
-    compileExpression(isEndBracket);
-    addCompileXMLList(getTokenKey()); // ]
+    compileArray();
   } else {
     addCompileXMLList(getTokenKey());
+    const varName = getTokenValue();
+    const kind = SymbolTable.kindOf(varName);
+    const index = SymbolTable.indexOf(varName);
+    if (kind == null) throw new Error(`kind is not found`);
+    if (index == null) throw new Error(`index is not found`);
+    VMWriter.writePush(convertedKindToSegment(kind), index);
   }
 };
 
