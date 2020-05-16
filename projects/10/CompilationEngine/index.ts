@@ -404,7 +404,7 @@ export const compileLet = () => {
       // vm
       if (kind == null) throw new Error(`kind is not found`);
       if (index == null) throw new Error(`index is not found`);
-      VMWriter.writePop((kind as unknown) as Segment, index);
+      VMWriter.writePop(convertedKindToSegment(kind), index);
 
       continue;
     }
@@ -655,5 +655,8 @@ export const Compilation = (className: string) => {
   }
   console.log(CompileManager.getCompileList());
   console.log(VMWriter.getList());
-  return CompileManager.getCompileXMLList().join("\n");
+  return {
+    xml: CompileManager.getCompileXMLList().join("\n"),
+    vm: VMWriter.getList().join("\n"),
+  };
 };

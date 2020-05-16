@@ -64,7 +64,7 @@ export const VMWriter = (() => {
       list.push(`call ${name} ${nArgs}`);
     },
     writeFunction(name: string, nLocals: number) {
-      list.push(`call ${name} ${nLocals}`);
+      list.push(`function ${name} ${nLocals}`);
     },
     writeReturn() {
       list.push(`return`);
