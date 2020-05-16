@@ -23,6 +23,12 @@ import {
   hasIdentifierKey,
   isMethod,
   convertOpToCommand,
+  convertUnaryOpToCommand,
+  isIntergerConstant,
+  isStringConstant,
+  isKeywordConstant,
+  isDot,
+  convertedKindToSegment,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
 import { VMWriter, Segment, Command, OS_MATH, OS_MEMORY } from "../VMWriter";
@@ -258,6 +264,67 @@ export const compileSubroutine = () => {
   addCompileXMLList("subroutineDec", "close");
 };
 
+export const compileSubroutineCall = () => {
+  let functionName = "";
+  let args = 0;
+  let subroutineName: string;
+
+  // identifier
+  addCompileXMLList(getTokenKey()); // subroutine, var, class
+  let identifier = getTokenValue();
+  advance();
+
+  console.log(`indetieifer:${identifier}`);
+
+  // .subroutine
+  if (isDot()) {
+    // dot
+    addCompileXMLList(getTokenKey()); // .
+    advance();
+
+    // subroutineName
+    addCompileXMLList(getTokenKey());
+    subroutineName = getTokenValue();
+    const type = SymbolTable.kindOf(getTokenKey());
+
+    // instance
+    if (type != null) {
+      const kind = SymbolTable.kindOf(identifier);
+      const index = SymbolTable.indexOf(identifier);
+
+      if (kind == null) throw new Error(`kind is not found`);
+      if (index == null) throw new Error(`index is not found`);
+
+      const segment = convertedKindToSegment(kind);
+
+      VMWriter.writePush(segment, index);
+      functionName = `${type}.${subroutineName}`;
+      args++;
+    }
+    // class
+    else {
+      functionName = `${identifier}.${subroutineName}`;
+    }
+    advance();
+  }
+  // (
+  else if (isStartParenthesis()) {
+    subroutineName = identifier;
+    functionName = `${TokenManager.getClassName()}.${subroutineName}`;
+    args++;
+    VMWriter.writePush(Segment.Pointer, 0);
+  }
+
+  // expression
+  addCompileXMLList(getTokenKey()); // (
+  compileExpressionList();
+  addCompileXMLList(getTokenKey()); // )
+
+  if (!functionName) throw new Error(`function name is invalid`);
+
+  VMWriter.writeCall(functionName, args);
+};
+
 // statements
 export const compileStatements = () => {
   addCompileXMLList("statements", "open");
@@ -384,17 +451,13 @@ export const compileIf = () => {
 export const compileDo = () => {
   addCompileXMLList("doStatement", "open");
   addCompileXMLList(getTokenKey()); // do
+
   // subroutineCall
-  while (!isSemicolonSymbol()) {
-    advance();
-    if (isStartParenthesis()) {
-      addCompileXMLList(getTokenKey()); // (
-      compileExpressionList();
-      addCompileXMLList(getTokenKey()); // )
-      continue;
-    }
-    addCompileXMLList(getTokenKey());
-  }
+  advance();
+  compileSubroutineCall();
+  advance();
+
+  addCompileXMLList(getTokenKey()); // ;
   addCompileXMLList("doStatement", "close");
   VMWriter.writePop(Segment.Temp, 0);
   advance();
@@ -455,6 +518,7 @@ export const compileExpression = (endCondition: () => boolean) => {
   if (hasUnaryOp()) {
     addCompileXMLList("term", "open");
     addCompileXMLList(getTokenKey()); // unaryOp
+    VMWriter.writeArithmetic(convertUnaryOpToCommand());
     advance();
     compileTerm();
     addCompileXMLList("term", "close");
@@ -496,35 +560,59 @@ export const compileExpressionList = () => {
 };
 
 export const compileIdentifierOnTerm = () => {
+  // Var Name
   if (hasDotLookAhead()) {
-    advance();
-    addCompileXMLList(getTokenKey()); //.
-    advance();
-    addCompileXMLList(getTokenKey()); // new
-    advance();
-    addCompileXMLList(getTokenKey()); // (
-    compileExpressionList();
-    addCompileXMLList(getTokenKey()); // )
-  }
-  if (hasStartBracketAhead()) {
+    compileSubroutineCall();
+  } else if (hasStartBracketAhead()) {
+    addCompileXMLList(getTokenKey());
     advance();
     addCompileXMLList(getTokenKey()); // [
     advance();
     compileExpression(isEndBracket);
     addCompileXMLList(getTokenKey()); // ]
+  } else {
+    addCompileXMLList(getTokenKey());
   }
 };
 
 // term
 export const compileTerm = () => {
   addCompileXMLList("term", "open");
-  addCompileXMLList(getTokenKey());
-  if (hasIdentifierKey()) compileIdentifierOnTerm();
+  if (hasIdentifierKey()) {
+    compileIdentifierOnTerm();
+  } else {
+    addCompileXMLList(getTokenKey());
+  }
   if (isStartParenthesis()) {
     // (
     advance();
     compileExpression(isEndParenthesis);
     addCompileXMLList(getTokenKey()); // )
+  }
+  if (isIntergerConstant())
+    VMWriter.writePush(Segment.Const, parseInt(getTokenValue(), 10));
+  if (isStringConstant()) {
+    const str = getTokenValue() as string;
+    VMWriter.writePush(Segment.Const, str.length);
+    VMWriter.writeCall("String.new", 1);
+    [...str].forEach((char) => {
+      const charPoint = char.codePointAt(0);
+      if (!charPoint)
+        throw new Error(`failed to converting charPoint: ${char}`);
+      VMWriter.writePush(Segment.Const, charPoint);
+      VMWriter.writeCall("String.appendChar", 2);
+    });
+  }
+  if (isKeywordConstant()) {
+    const str = getTokenValue() as string;
+    if (str === "this") {
+      VMWriter.writePush(Segment.Pointer, 0);
+    } else {
+      VMWriter.writePush(Segment.Const, 0);
+      if (str === "true") {
+        VMWriter.writeArithmetic(Command.Not);
+      }
+    }
   }
   addCompileXMLList("term", "close");
 };

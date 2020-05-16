@@ -1,6 +1,12 @@
 import { TokenManager } from "../Tokenizer/TokenManager";
 import { CompileManager } from "./CompileManager";
-import { Command } from "../VMWriter";
+import { Command, Segment } from "../VMWriter";
+import {
+  TYPE_INT_CONST,
+  TYPE_STRING_CONST,
+  TYPE_KEYWORD,
+} from "../libs/constants";
+import { SymbolKind } from "../SymbolTable";
 
 type TagPos = "both" | "open" | "close";
 
@@ -51,7 +57,17 @@ export const isEqualSymbol = () => getTokenValue() === "=";
 export const isSemicolonSymbol = () => getTokenValue() === ";";
 export const isCommaSymbol = () => getTokenValue() === ",";
 export const isPipeSymbol = () => getTokenValue() === "|";
+export const isDot = () => getTokenValue() === ".";
 export const isMethod = () => getTokenValue() === "method";
+
+export const isIntergerConstant = () => getTokenValue() === TYPE_INT_CONST;
+export const isStringConstant = () => getTokenValue() === TYPE_STRING_CONST;
+export const isKeywordConstant = () =>
+  getTokenKey() === TYPE_KEYWORD &&
+  (getTokenValue() === "true" ||
+    getTokenValue() === "false" ||
+    getTokenValue() === "null" ||
+    getTokenValue() === "this");
 
 export const hasDotLookAhead = () => {
   const lookAhead = lookahead();
@@ -90,6 +106,30 @@ export const convertOpToCommand = (): Command => {
     case "=":
       return Command.Eq;
     default:
-      throw new Error(`invalid op: ${getTokenValue()}`)
+      throw new Error(`invalid op: ${getTokenValue()}`);
+  }
+};
+
+export const convertUnaryOpToCommand = (): Command => {
+  switch (getTokenValue()) {
+    case "-":
+      return Command.Neg;
+    case "~":
+      return Command.Not;
+    default:
+      throw new Error(`invalid unaryop: ${getTokenValue()}`);
+  }
+};
+
+export const convertedKindToSegment = (kind: SymbolKind): Segment => {
+  switch (kind) {
+    case SymbolKind.Argument:
+      return Segment.Arg;
+    case SymbolKind.Var:
+      return Segment.Local;
+    case SymbolKind.Field:
+      return Segment.This;
+    case SymbolKind.Static:
+      return Segment.Static;
   }
 };
