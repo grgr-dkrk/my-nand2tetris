@@ -15,7 +15,6 @@ import {
   getTokenValue,
   isStartBracket,
   isEndBracket,
-  isEqualSymbol,
   hasUnaryOp,
   isOp,
   isCommaSymbol,
@@ -144,7 +143,6 @@ export const compileSubroutineBody = (kind: string, name: Name) => {
   addCompileXMLList("subroutineBody", "open");
   addCompileXMLList(getTokenKey()); // {
   let functionName: string;
-  let local: number;
 
   advance();
 
