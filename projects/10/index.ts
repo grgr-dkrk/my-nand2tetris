@@ -11,6 +11,7 @@ const main = () => {
   checkArgv(process.argv);
   const root = process.argv[2];
   const dir = getFileDir(root);
+  const compileFolderName = root.split('/').slice(-1)[0]
   dir.forEach((filePath) => {
     if (!filePath.endsWith(".jack")) return;
     const file = fs.readFileSync(path.resolve(root, filePath), {
@@ -40,13 +41,24 @@ const main = () => {
      */
     if (process.argv[3] && process.argv[3] === "--compile") {
       console.log(`compile generating: ${filePath}`);
-      const compileXML = Compilation(filePath.replace(".jack", ""));
+      const className = filePath.replace(".jack", "");
+      const compiled = Compilation(className);
+      if (!fs.existsSync(path.resolve(__dirname, `ProgramResults/${compileFolderName}`))) {
+        fs.mkdirSync(path.resolve(__dirname, `ProgramResults/${compileFolderName}`))
+      }
       fs.writeFileSync(
         path.resolve(
           __dirname,
           `ProgramResults/Compiler/${filePath.replace(".jack", ".xml")}`
         ),
-        compileXML
+        compiled.xml
+      );
+      fs.writeFileSync(
+        path.resolve(
+          __dirname,
+          `ProgramResults/${compileFolderName}/${filePath.replace(".jack", ".vm")}`
+        ),
+        compiled.vm
       );
     }
     console.log(`completed: ${filePath}`);
