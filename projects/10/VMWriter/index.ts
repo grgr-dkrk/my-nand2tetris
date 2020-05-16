@@ -27,7 +27,7 @@ export const OS_MATH = {
 } as const;
 
 export const OS_MEMORY = {
-  ALLOC: "Math.multiply",
+  ALLOC: "Memory.alloc",
 } as const;
 
 type Indexes = {
