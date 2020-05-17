@@ -94,6 +94,9 @@ export const VMWriter = (() => {
     getIfIndex() {
       return indexes.if;
     },
+    resetIfIndex() {
+      indexes.if = 0;
+    },
     getList() {
       return list;
     },

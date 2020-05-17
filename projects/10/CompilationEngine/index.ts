@@ -422,27 +422,34 @@ export const compileIf = () => {
   compileExpression(isEndParenthesis);
   addCompileXMLList(getTokenKey()); // )
   advance();
+
+  // statement
   addCompileXMLList(getTokenKey()); // {
   advance();
   VMWriter.writeIf(`IF_TRUE${ifIndex}`);
   VMWriter.writeGoto(`IF_FALSE${ifIndex}`);
   VMWriter.writeLabel(`IF_TRUE${ifIndex}`);
   compileStatements();
-  VMWriter.writeGoto(`IF_END${ifIndex}`);
   addCompileXMLList(getTokenKey()); // }
-  VMWriter.writeLabel(`IF_FALSE${ifIndex}`);
   advance();
+
+  // else
   if (getTokenValue() === "else") {
+    VMWriter.writeGoto(`IF_END${ifIndex}`);
+    VMWriter.writeLabel(`IF_FALSE${ifIndex}`);
+
     addCompileXMLList(getTokenKey()); // else
     advance();
     addCompileXMLList(getTokenKey()); // {
     advance();
     compileStatements();
     addCompileXMLList(getTokenKey()); // }
+    VMWriter.writeLabel(`IF_END${ifIndex}`);
     advance();
+  } else {
+    VMWriter.writeLabel(`IF_FALSE${ifIndex}`);
   }
-  VMWriter.writeLabel(`IF_END${ifIndex}`);
-  VMWriter.addIfIndex();
+
   addCompileXMLList("ifStatement", "close");
 };
 
