@@ -60,8 +60,8 @@ export const isPipeSymbol = () => getTokenValue() === "|";
 export const isDot = () => getTokenValue() === ".";
 export const isMethod = () => getTokenValue() === "method";
 
-export const isIntergerConstant = () => getTokenValue() === TYPE_INT_CONST;
-export const isStringConstant = () => getTokenValue() === TYPE_STRING_CONST;
+export const isIntergerConstant = () => getTokenKey() === TYPE_INT_CONST;
+export const isStringConstant = () => getTokenKey() === TYPE_STRING_CONST;
 export const isKeywordConstant = () =>
   getTokenKey() === TYPE_KEYWORD &&
   (getTokenValue() === "true" ||
@@ -89,8 +89,9 @@ export const hasUnaryOp = () => {
 export const hasSymbolKey = () => getTokenKey() === "symbol";
 export const hasIdentifierKey = () => getTokenKey() === "identifier";
 
-export const convertOpToCommand = (): Command => {
-  switch (getTokenValue()) {
+export const convertOpToCommand = (arg?: string): Command => {
+  const statement = arg || getTokenValue()
+  switch (statement) {
     case "+":
       return Command.Add;
     case "-":

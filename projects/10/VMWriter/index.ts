@@ -33,14 +33,18 @@ export const OS_MEMORY = {
 type Indexes = {
   while: number;
   if: number;
+  args: number;
+};
+
+const initialIndexes: Indexes = {
+  while: 0,
+  if: 0,
+  args: 0,
 };
 
 export const VMWriter = (() => {
   let list: string[] = [];
-  const indexes: Indexes = {
-    while: 0,
-    if: 0,
-  };
+  let indexes: Indexes = { ...initialIndexes };
   return {
     writePush(segment: Segment, index: number) {
       list.push(`push ${segment} ${index}`);
@@ -69,6 +73,15 @@ export const VMWriter = (() => {
     writeReturn() {
       list.push(`return`);
     },
+    addArgIndex() {
+      indexes.args++;
+    },
+    getArgIndex() {
+      return indexes.args;
+    },
+    resetArgIndex() {
+      indexes.args = 0;
+    },
     addWhileIndex() {
       indexes.while++;
     },
@@ -86,6 +99,7 @@ export const VMWriter = (() => {
     },
     reset() {
       list = [];
+      indexes = initialIndexes;
     },
   };
 })();

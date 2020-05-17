@@ -266,7 +266,6 @@ export const compileSubroutine = () => {
 
 export const compileSubroutineCall = () => {
   let functionName = "";
-  let args = 0;
   let subroutineName: string;
 
   // identifier
@@ -295,11 +294,9 @@ export const compileSubroutineCall = () => {
       if (kind == null) throw new Error(`kind is not found`);
       if (index == null) throw new Error(`index is not found`);
 
-      const segment = convertedKindToSegment(kind);
-
-      VMWriter.writePush(segment, index);
+      VMWriter.writePush(convertedKindToSegment(kind), index);
       functionName = `${type}.${subroutineName}`;
-      args++;
+      VMWriter.addArgIndex();
     }
     // class
     else {
@@ -311,7 +308,7 @@ export const compileSubroutineCall = () => {
   else if (isStartParenthesis()) {
     subroutineName = identifier;
     functionName = `${TokenManager.getClassName()}.${subroutineName}`;
-    args++;
+    VMWriter.addArgIndex();
     VMWriter.writePush(Segment.Pointer, 0);
   }
 
@@ -322,7 +319,8 @@ export const compileSubroutineCall = () => {
 
   if (!functionName) throw new Error(`function name is invalid`);
 
-  VMWriter.writeCall(functionName, args);
+  VMWriter.writeCall(functionName, VMWriter.getArgIndex());
+  VMWriter.resetArgIndex();
 };
 
 // statements
@@ -363,7 +361,7 @@ export const compileLet = () => {
   addCompileXMLList("letStatement", "open");
   addCompileXMLList(getTokenKey()); // let
 
-  // name, kind, inedx
+  // name, kind, index
   advance();
   name = getTokenValue();
   kind = SymbolTable.kindOf(name);
@@ -382,6 +380,7 @@ export const compileLet = () => {
       if (kind == null) throw new Error(`kind is not found`);
       if (index == null) throw new Error(`index is not found`);
       VMWriter.writePush(convertedKindToSegment(kind), index);
+
       VMWriter.writeArithmetic(Command.Add);
       VMWriter.writePop(Segment.Temp, 0);
 
@@ -515,6 +514,7 @@ export const compileReturn = () => {
 // expression
 export const compileExpression = (endCondition: () => boolean) => {
   addCompileXMLList("expression", "open");
+  let op: string = '';
   if (hasUnaryOp()) {
     addCompileXMLList("term", "open");
     addCompileXMLList(getTokenKey()); // unaryOp
@@ -526,20 +526,23 @@ export const compileExpression = (endCondition: () => boolean) => {
   }
   while (!endCondition()) {
     if (isOp()) {
+      op = getTokenValue()
       addCompileXMLList(getTokenKey()); // op
-      if (getTokenValue() === "*") {
-        VMWriter.writeCall(OS_MATH.MULTIPLY, 2);
-      } else if (getTokenValue() === "/") {
-        VMWriter.writeCall(OS_MATH.DIVIDE, 2);
-      } else {
-        VMWriter.writeArithmetic(convertOpToCommand());
-      }
       advance();
     }
     if (isCommaSymbol()) {
       break;
     }
     compileTerm();
+    if (op) {
+      if (op === "*") {
+        VMWriter.writeCall(OS_MATH.MULTIPLY, 2);
+      } else if (op === "/") {
+        VMWriter.writeCall(OS_MATH.DIVIDE, 2);
+      } else {
+        VMWriter.writeArithmetic(convertOpToCommand(op));
+      }
+    }
     advance();
   }
   addCompileXMLList("expression", "close");
@@ -550,10 +553,12 @@ export const compileExpressionList = () => {
   addCompileXMLList("expressionList", "open");
   advance();
   while (!isEndParenthesis()) {
+    // comma区切りはXMLの出力のみ
     if (isCommaSymbol()) {
       addCompileXMLList(getTokenKey()); //,
       advance();
     }
+    VMWriter.addArgIndex();
     compileExpression(isEndParenthesis);
   }
   addCompileXMLList("expressionList", "close");
