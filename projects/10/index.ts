@@ -19,7 +19,6 @@ const main = () => {
     });
     console.log(`start: ${filePath}`);
     const tokenizedString = Tokenizer(Splitter(file));
-    console.log(tokenizedString);
 
     /**
      * Tokenizer

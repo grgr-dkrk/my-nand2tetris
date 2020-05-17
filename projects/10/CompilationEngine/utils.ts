@@ -111,14 +111,15 @@ export const convertOpToCommand = (arg?: string): Command => {
   }
 };
 
-export const convertUnaryOpToCommand = (): Command => {
-  switch (getTokenValue()) {
+export const convertUnaryOpToCommand = (arg?: string): Command => {
+  const statement = arg || getTokenValue()
+  switch (statement) {
     case "-":
       return Command.Neg;
     case "~":
       return Command.Not;
     default:
-      throw new Error(`invalid unaryop: ${getTokenValue()}`);
+      throw new Error(`invalid unaryop: ${statement}`);
   }
 };
 

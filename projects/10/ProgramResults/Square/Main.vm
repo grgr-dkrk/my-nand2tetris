@@ -1,9 +1,11 @@
 function Main.main 1
 call SquareGame.new 0
 pop local 0
-call game.run 0
+push local 0
+call SquareGame.run 1
 pop temp 0
-call game.dispose 0
+push local 0
+call SquareGame.dispose 1
 pop temp 0
 push constant 0
 return
@@ -44,37 +46,37 @@ push constant 110
 call String.appendChar 2
 push constant 116
 call String.appendChar 2
-pop local 3
+pop local 2
 push constant 0
-pop local 3
+pop local 2
 push constant 1
-push local 4
+push local 3
 add
-pop temp 0
 push constant 2
-push local 4
+push local 3
 add
 pop pointer 1
 push that 0
-push temp 0
+pop temp 0
 pop pointer 1
+push temp 0
 pop that 0
 goto IF_END0
 label IF_FALSE0
+push local 0
 push local 1
 neg
-push local 2
 call Math.multiply 2
-pop local 1
-push local 2
-neg
-push constant 2
-call Math.divide 2
-pop local 2
+pop local 0
 push local 1
-push local 2
-or
+push constant 2
+neg
+call Math.divide 2
 pop local 1
+push local 0
+push local 1
+or
+pop local 0
 label IF_END0
 push constant 0
 return

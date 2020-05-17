@@ -32,6 +32,8 @@ export const SymbolTable = (() => {
   return {
     startSubroutine() {
       subroutineScope = {};
+      count.argument = 0;
+      count.var = 0;
     },
     define(name: Name, type: Type, kind: SymbolKind) {
       console.log(`define: ${name}, ${type}, ${kind}`);
@@ -78,6 +80,8 @@ export const SymbolTable = (() => {
       return null;
     },
     indexOf(name: string) {
+      console.log(classScope[name])
+      console.log(subroutineScope[name])
       if (classScope[name]) return classScope[name].index;
       if (subroutineScope[name]) return subroutineScope[name].index;
       return null;

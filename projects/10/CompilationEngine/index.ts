@@ -84,7 +84,7 @@ export const compileClassVarDec = () => {
   addCompileXMLList(getTokenKey());
   advance();
 
-  // define varDec
+  // define classVarDec
   SymbolTable.define(name, type, kind);
 
   while (true) {
@@ -284,7 +284,7 @@ export const compileSubroutineCall = () => {
     // subroutineName
     addCompileXMLList(getTokenKey());
     subroutineName = getTokenValue();
-    const type = SymbolTable.kindOf(getTokenKey());
+    const type = SymbolTable.typeOf(identifier);
 
     // instance
     if (type != null) {
@@ -366,48 +366,42 @@ export const compileLet = () => {
   name = getTokenValue();
   kind = SymbolTable.kindOf(name);
   index = SymbolTable.indexOf(name);
+  console.log(SymbolTable.getClassScope())
+  console.log(SymbolTable.getSubroutineScope())
+  console.log(name)
+  if (kind == null) throw new Error(`kind is not found`);
+  if (index == null) throw new Error(`index is not found`);
   addCompileXMLList(getTokenKey()); // varName
 
-  while (!isSemicolonSymbol()) {
+  advance();
+
+  if (isStartBracket()) {
+    addCompileXMLList(getTokenKey()); // [
     advance();
-    if (isStartBracket()) {
-      addCompileXMLList(getTokenKey()); // [
-      advance();
-      compileExpression(isEndBracket);
-      addCompileXMLList(getTokenKey()); // ]
+    compileExpression(isEndBracket);
+    addCompileXMLList(getTokenKey()); // ]
 
-      // vm
-      if (kind == null) throw new Error(`kind is not found`);
-      if (index == null) throw new Error(`index is not found`);
-      VMWriter.writePush(convertedKindToSegment(kind), index);
+    // vm
+    VMWriter.writePush(convertedKindToSegment(kind), index);
+    VMWriter.writeArithmetic(Command.Add);
 
-      VMWriter.writeArithmetic(Command.Add);
-      VMWriter.writePop(Segment.Temp, 0);
+    advance();
+    addCompileXMLList(getTokenKey()); // =
+    advance();
+    compileExpression(isSemicolonSymbol);
 
-      advance();
-      addCompileXMLList(getTokenKey()); // =
-      advance();
-      compileExpression(isSemicolonSymbol);
-      addCompileXMLList(getTokenKey()); // ;
-
-      VMWriter.writePush(Segment.Temp, 0);
-      VMWriter.writePop(Segment.Pointer, 1);
-      VMWriter.writePop(Segment.That, 0);
-      continue;
-    } else {
-      addCompileXMLList(getTokenKey()); // =
-      advance();
-      compileExpression(isSemicolonSymbol);
-      addCompileXMLList(getTokenKey()); // ;
-
-      // vm
-      if (kind == null) throw new Error(`kind is not found`);
-      if (index == null) throw new Error(`index is not found`);
-      VMWriter.writePop(convertedKindToSegment(kind), index);
-
-      continue;
-    }
+    VMWriter.writePop(Segment.Temp, 0);
+    VMWriter.writePop(Segment.Pointer, 1);
+    VMWriter.writePush(Segment.Temp, 0);
+    VMWriter.writePop(Segment.That, 0);
+  } else {
+    addCompileXMLList(getTokenKey()); // =
+    advance();
+    compileExpression(isSemicolonSymbol);
+    // vm
+    VMWriter.writePop(convertedKindToSegment(kind), index);
   }
+  addCompileXMLList(getTokenKey()); // ;
   addCompileXMLList("letStatement", "close");
 };
 
@@ -521,19 +515,20 @@ export const compileReturn = () => {
 // expression
 export const compileExpression = (endCondition: () => boolean) => {
   addCompileXMLList("expression", "open");
-  let op: string = '';
+  let op: string = "";
   if (hasUnaryOp()) {
     addCompileXMLList("term", "open");
     addCompileXMLList(getTokenKey()); // unaryOp
-    VMWriter.writeArithmetic(convertUnaryOpToCommand());
+    op = getTokenValue();
     advance();
     compileTerm();
+    VMWriter.writeArithmetic(convertUnaryOpToCommand(op));
     addCompileXMLList("term", "close");
     advance();
   }
   while (!endCondition()) {
     if (isOp()) {
-      op = getTokenValue()
+      op = getTokenValue();
       addCompileXMLList(getTokenKey()); // op
       advance();
     }
@@ -665,8 +660,6 @@ export const Compilation = (className: string) => {
   while (!TokenManager.getIsNextTokenMapDone()) {
     iterateComplation();
   }
-  console.log(CompileManager.getCompileList());
-  console.log(VMWriter.getList());
   return {
     xml: CompileManager.getCompileXMLList().join("\n"),
     vm: VMWriter.getList().join("\n"),
