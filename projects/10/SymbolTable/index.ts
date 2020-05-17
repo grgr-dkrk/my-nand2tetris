@@ -36,7 +36,6 @@ export const SymbolTable = (() => {
       count.var = 0;
     },
     define(name: Name, type: Type, kind: SymbolKind) {
-      console.log(`define: ${name}, ${type}, ${kind}`);
       switch (kind) {
         case SymbolKind.Static:
           classScope[name] = { type, kind, index: count.static };
@@ -80,8 +79,6 @@ export const SymbolTable = (() => {
       return null;
     },
     indexOf(name: string) {
-      console.log(classScope[name])
-      console.log(subroutineScope[name])
       if (classScope[name]) return classScope[name].index;
       if (subroutineScope[name]) return subroutineScope[name].index;
       return null;

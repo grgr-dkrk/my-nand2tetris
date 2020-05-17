@@ -274,8 +274,6 @@ export const compileSubroutineCall = () => {
   let identifier = getTokenValue();
   advance();
 
-  console.log(`indetieifer:${identifier}`);
-
   // .subroutine
   if (isDot()) {
     // dot
@@ -327,7 +325,6 @@ export const compileSubroutineCall = () => {
 // statements
 export const compileStatements = () => {
   addCompileXMLList("statements", "open");
-  console.log(`token: ${getTokenValue()}`);
   while (!isEndBrace()) {
     switch (getTokenValue()) {
       case "let":
@@ -367,9 +364,6 @@ export const compileLet = () => {
   name = getTokenValue();
   kind = SymbolTable.kindOf(name);
   index = SymbolTable.indexOf(name);
-  console.log(SymbolTable.getClassScope())
-  console.log(SymbolTable.getSubroutineScope())
-  console.log(name)
   if (kind == null) throw new Error(`kind is not found`);
   if (index == null) throw new Error(`index is not found`);
   addCompileXMLList(getTokenKey()); // varName

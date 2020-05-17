@@ -7,7 +7,7 @@ pop this 0
 push argument 1
 pop this 1
 push argument 2
-pop this 1
+pop this 2
 push pointer 0
 call Square.draw 1
 pop temp 0
@@ -60,7 +60,7 @@ push pointer 0
 call Square.erase 1
 pop temp 0
 push this 2
-pop this 1
+pop this 2
 push pointer 0
 call Square.draw 1
 pop temp 0
@@ -78,7 +78,7 @@ push pointer 0
 call Square.erase 1
 pop temp 0
 push this 2
-pop this 1
+pop this 2
 push pointer 0
 call Square.draw 1
 pop temp 0
