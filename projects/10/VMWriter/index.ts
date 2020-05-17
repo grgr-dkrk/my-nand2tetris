@@ -36,9 +36,10 @@ type Indexes = {
   args: number;
 };
 
+// whileとifはnestがあるので-1から始め、発火直後に+1する
 const initialIndexes: Indexes = {
-  while: 0,
-  if: 0,
+  while: -1,
+  if: -1,
   args: 0,
 };
 
@@ -88,6 +89,9 @@ export const VMWriter = (() => {
     getWhileIndex() {
       return indexes.while;
     },
+    resetWhileIndex() {
+      indexes.while = -1;
+    },
     addIfIndex() {
       indexes.if++;
     },
@@ -95,14 +99,14 @@ export const VMWriter = (() => {
       return indexes.if;
     },
     resetIfIndex() {
-      indexes.if = 0;
+      indexes.if = -1;
     },
     getList() {
       return list;
     },
     reset() {
       list = [];
-      indexes = initialIndexes;
+      indexes = {...initialIndexes};
     },
   };
 })();

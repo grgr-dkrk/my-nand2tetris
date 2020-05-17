@@ -1,12 +1,12 @@
 import { TokenManager } from "../Tokenizer/TokenManager";
 import { CompileManager } from "./CompileManager";
-import { Command, Segment } from "../VMWriter";
+import { Command, Segment, VMWriter } from "../VMWriter";
 import {
   TYPE_INT_CONST,
   TYPE_STRING_CONST,
   TYPE_KEYWORD,
 } from "../libs/constants";
-import { SymbolKind } from "../SymbolTable";
+import { SymbolKind, SymbolTable } from "../SymbolTable";
 
 type TagPos = "both" | "open" | "close";
 
@@ -135,3 +135,8 @@ export const convertedKindToSegment = (kind: SymbolKind): Segment => {
       return Segment.Static;
   }
 };
+
+export const startSubroutine = () => {
+  SymbolTable.startSubroutine();
+  VMWriter.resetIfIndex();
+}

@@ -29,6 +29,7 @@ import {
   isKeywordConstant,
   isDot,
   convertedKindToSegment,
+  startSubroutine,
 } from "./utils";
 import { SymbolKind, Type, Name, SymbolTable } from "../SymbolTable";
 import { VMWriter, Segment, Command, OS_MATH, OS_MEMORY } from "../VMWriter";
@@ -221,7 +222,7 @@ export const compileSubroutine = () => {
   addCompileXMLList("keyword");
   let kind: string;
   let name: Name;
-  SymbolTable.startSubroutine();
+  startSubroutine();
 
   // define Method
   if (isMethod()) {
@@ -407,6 +408,7 @@ export const compileLet = () => {
 
 // if
 export const compileIf = () => {
+  VMWriter.addIfIndex();
   const ifIndex = VMWriter.getIfIndex();
   addCompileXMLList("ifStatement", "open");
   addCompileXMLList(getTokenKey()); // if
@@ -465,13 +467,14 @@ export const compileDo = () => {
 
 // while
 export const compileWhile = () => {
+  VMWriter.addWhileIndex();
   addCompileXMLList("whileStatement", "open");
   const whileIndex = VMWriter.getWhileIndex();
   addCompileXMLList(getTokenKey()); // while
   advance();
 
   //vm
-  VMWriter.writeLabel(`WHILE${whileIndex}`);
+  VMWriter.writeLabel(`WHILE_EXP${whileIndex}`);
 
   // conition
   addCompileXMLList(getTokenKey()); // (
@@ -486,12 +489,11 @@ export const compileWhile = () => {
   VMWriter.writeIf(`WHILE_END${whileIndex}`);
   advance();
   compileStatements();
-  VMWriter.writeGoto(`WHILE${whileIndex}`);
+  VMWriter.writeGoto(`WHILE_EXP${whileIndex}`);
   VMWriter.writeLabel(`WHILE_END${whileIndex}`);
   addCompileXMLList(getTokenKey()); // }
   advance();
 
-  VMWriter.addWhileIndex();
   addCompileXMLList("whileStatement", "close");
 };
 
